@@ -11,5 +11,9 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 14
     frontend_origin: str = "http://localhost:5173"
 
+    @property
+    def allowed_origins(self) -> list[str]:
+        return [origin.strip() for origin in self.frontend_origin.split(",") if origin.strip()]
+
 
 settings = Settings()

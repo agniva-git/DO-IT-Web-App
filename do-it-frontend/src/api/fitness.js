@@ -1,11 +1,15 @@
 import api from './client.js'
 
-// Body parts trained, not specific exercises — list changes based on the
-// gender toggle. Adjust freely; this is a starting point, not fixed data.
-export const BODY_PARTS = {
-  male: ['Chest', 'Shoulders', 'Back', 'Arms', 'Abs', 'Legs'],
-  female: ['Arms', 'Legs', 'Back', 'Glutes', 'Abs', 'Shoulders']
-}
+// Universal body parts list for logging workout sessions
+export const BODY_PARTS = [
+  'Chest',
+  'Back',
+  'Shoulders',
+  'Arms',
+  'Abs',
+  'Glutes',
+  'Legs'
+]
 
 export const FITNESS_GOALS = [
   { value: 'general', label: 'General fitness' },

@@ -13,11 +13,13 @@ export default function SessionHistoryList({ sessions }) {
           {sorted.map((s) => (
             <li
               key={s.id}
-              className="flex items-center justify-between px-4 py-2.5 rounded-card border border-line bg-surfaceRaised text-sm"
+              className="flex items-center justify-between gap-2 px-3 sm:px-4 py-2.5 rounded-card border border-line bg-surfaceRaised text-sm"
             >
-              <span className="text-paper/80">{s.subject}</span>
-              <span className="text-paper/40 font-mono text-xs">{s.date}</span>
-              <span className="text-plan">{s.duration} min</span>
+              <span className="text-paper/80 min-w-0 truncate">{s.subject}</span>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-paper/40 font-mono text-xs">{s.date}</span>
+                <span className="text-plan">{s.duration} min</span>
+              </div>
             </li>
           ))}
         </ul>

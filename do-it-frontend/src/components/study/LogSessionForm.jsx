@@ -30,7 +30,7 @@ export default function LogSessionForm({ open, onClose, onSave, subjects }) {
             onChange={setSubject}
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             id="duration"
             type="number"

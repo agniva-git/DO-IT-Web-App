@@ -7,9 +7,9 @@ export default function StudyGoalCard({ goal, minutesThisWeek, onEdit, onDelete 
 
   return (
     <Card>
-      <div className="flex items-start justify-between mb-2">
-        <div>
-          <h3 className="font-display text-lg">{goal.subject}</h3>
+      <div className="flex items-start justify-between mb-2 gap-2">
+        <div className="min-w-0">
+          <h3 className="font-display text-lg truncate">{goal.subject}</h3>
           <p className="text-xs text-paper/40 mt-0.5">Target: {goal.target_date}</p>
         </div>
         <div className="flex gap-1 shrink-0">

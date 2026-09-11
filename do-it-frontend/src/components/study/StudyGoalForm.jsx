@@ -39,7 +39,7 @@ export default function StudyGoalForm({ open, onClose, onSave, editingGoal }) {
           onChange={(e) => update('subject', e.target.value)}
           required
         />
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             id="target_date"
             type="date"

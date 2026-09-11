@@ -10,12 +10,19 @@ import FocusSummary from '../components/dashboard/FocusSummary.jsx'
 import FitnessSummary from '../components/dashboard/FitnessSummary.jsx'
 import HabitsChecklist from '../components/dashboard/HabitsChecklist.jsx'
 import QuickActions from '../components/dashboard/QuickActions.jsx'
+import QuickExpenseModal from '../components/dashboard/QuickExpenseModal.jsx'
 import Card from '../components/ui/Card.jsx'
-import { listTasks, createTask } from '../api/tasks.js'
+import { listTasks, toggleTaskComplete } from '../api/tasks.js'
 import { listFocusSessions } from '../api/focus.js'
 import { listWorkouts, getPreferences } from '../api/fitness.js'
 import { listHabits, listHabitLogs, checkIn, todayISO } from '../api/habits.js'
-import { listMonths, getMonth, listMonthExpenses, currentYearMonth } from '../api/budget.js'
+import {
+  listMonths,
+  getMonth,
+  logExpense,
+  listMonthExpenses,
+  currentYearMonth
+} from '../api/budget.js'
 import {
   localDateISO,
   startOfThisWeek,
@@ -40,6 +47,11 @@ export default function Dashboard() {
   const [habitLogs, setHabitLogs] = useState([])
   const [todaysExpenses, setTodaysExpenses] = useState([])
   const [hasBudgetThisMonth, setHasBudgetThisMonth] = useState(false)
+  const [currentMonthId, setCurrentMonthId] = useState(null)
+  const [budgetCategories, setBudgetCategories] = useState([])
+
+  // Quick expense modal state
+  const [expenseModalOpen, setExpenseModalOpen] = useState(false)
 
   useEffect(() => {
     const loadEverything = async () => {
@@ -63,10 +75,17 @@ export default function Dashboard() {
       const currentBudget = budgetMonths.find((m) => m.year === year && m.month === month)
       if (currentBudget) {
         setHasBudgetThisMonth(true)
-        const allExpenses = await getMonth(currentBudget.id)
-        // listMonthExpenses returns flat list; getMonth has categories with expenses nested.
-        // Use listMonthExpenses for today's flat view.
-        const flat = await listMonthExpenses(currentBudget.id)
+        setCurrentMonthId(currentBudget.id)
+        // Fetch full month detail for categories + today's flat expenses in parallel.
+        const [fullMonth, flat] = await Promise.all([
+          getMonth(currentBudget.id),
+          listMonthExpenses(currentBudget.id)
+        ])
+        // Sort: non-default (real planned categories) first, Sudden Expenses last.
+        const sorted = [...(fullMonth.categories || [])].sort(
+          (a, b) => (a.is_default ? 1 : 0) - (b.is_default ? 1 : 0)
+        )
+        setBudgetCategories(sorted)
         setTodaysExpenses(flat.filter((e) => e.date === localDateISO()))
       }
     }
@@ -78,7 +97,7 @@ export default function Dashboard() {
 
   const today = localDateISO()
 
-  // Tasks due today, sorted: incomplete first, then by priority.
+  // Tasks due today, sorted: incomplete first by priority.
   const todaysTasks = useMemo(() => {
     return tasks
       .filter((t) => t.due_date === today)
@@ -88,15 +107,18 @@ export default function Dashboard() {
       })
   }, [tasks, today])
 
-  // Overdue: past due date and not completed.
+  // Overdue: past due date, not yet complete.
   const overdueTasks = useMemo(() => {
     return tasks
       .filter((t) => t.due_date && t.due_date < today && t.status !== 'completed')
       .sort((a, b) => a.due_date.localeCompare(b.due_date))
   }, [tasks, today])
 
-  const tasksCompleted = todaysTasks.filter((t) => t.status === 'completed').length
-  // Include overdue tasks in the total so the progress bar is honest.
+  const tasksCompleted = useMemo(
+    () =>
+      [...todaysTasks, ...overdueTasks].filter((t) => t.status === 'completed').length,
+    [todaysTasks, overdueTasks]
+  )
   const tasksTotal = todaysTasks.length + overdueTasks.length
 
   const todaysFocusSessions = useMemo(
@@ -147,6 +169,44 @@ export default function Dashboard() {
     }))
   }, [habits, habitLogs, today])
 
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  // Toggle a task complete/incomplete directly from the Dashboard.
+  const handleToggleTask = async (id) => {
+    const task = tasks.find((t) => t.id === id)
+    if (!task) return
+    const wasCompleting = task.status !== 'completed'
+    // Optimistic update
+    setTasks((ts) =>
+      ts.map((t) => (t.id === id ? { ...t, status: wasCompleting ? 'completed' : 'pending' } : t))
+    )
+    try {
+      const updated = await toggleTaskComplete(id)
+      setTasks((ts) => ts.map((t) => (t.id === id ? updated : t)))
+    } catch {
+      // Roll back
+      setTasks((ts) => ts.map((t) => (t.id === id ? task : t)))
+    }
+  }
+
+  // Quick expense from Dashboard — logs to budget and refreshes today's total.
+  const handleQuickExpense = async (categoryId, expenseData) => {
+    await logExpense(categoryId, expenseData)
+    // Refresh expenses and categories (remaining amounts change after a log).
+    if (currentMonthId) {
+      const [fullMonth, flat] = await Promise.all([
+        getMonth(currentMonthId),
+        listMonthExpenses(currentMonthId)
+      ])
+      const sorted = [...(fullMonth.categories || [])].sort(
+        (a, b) => (a.is_default ? 1 : 0) - (b.is_default ? 1 : 0)
+      )
+      setBudgetCategories(sorted)
+      setTodaysExpenses(flat.filter((e) => e.date === localDateISO()))
+    }
+    setExpenseModalOpen(false)
+  }
+
   const handleToggleHabit = async (habitId) => {
     const existing = habitLogs.find((l) => l.habit_id === habitId && l.date === today)
     const nextCompleted = existing ? !existing.completed : true
@@ -175,6 +235,8 @@ export default function Dashboard() {
     }
   }
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -185,11 +247,11 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen px-4 sm:px-6 md:px-12 py-8 sm:py-10">
-      <header className="mb-6">
+      <header className="mb-5">
         <h1 className="font-display text-2xl sm:text-3xl">
           Good {greeting()}, {user?.name} 👋
         </h1>
-        <p className="text-paper/50 mt-1 text-sm sm:text-base">{formatDateLong(new Date())}</p>
+        <p className="text-paper/50 mt-0.5 text-sm sm:text-base">{formatDateLong(new Date())}</p>
       </header>
 
       {error && <p className="text-sm text-danger mb-4">{error}</p>}
@@ -199,26 +261,33 @@ export default function Dashboard() {
         onStartFocus={() => navigate('/focus')}
         onAddTask={() => navigate('/tasks')}
         onLogWorkout={() => navigate('/fitness')}
-        onLogExpense={() => navigate('/budget')}
+        onLogExpense={() => setExpenseModalOpen(true)}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-6">
-        {/* Left / main column */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+        {/* ── Left / main column ── */}
         <div className="lg:col-span-2 flex flex-col gap-5">
           <TodayProgress completed={tasksCompleted} total={tasksTotal} />
-          <TodaysTasks tasks={todaysTasks} overdueTasks={overdueTasks} />
+
+          {/* Tasks — interactive checkboxes */}
+          <TodaysTasks
+            tasks={todaysTasks}
+            overdueTasks={overdueTasks}
+            onToggle={handleToggleTask}
+          />
+
           {todaysFocusSessions.length > 0 && (
             <TodaysFocusSessions sessions={todaysFocusSessions} />
           )}
           {todaysWorkouts.length > 0 && (
             <TodaysWorkouts workouts={todaysWorkouts} />
           )}
-          {hasBudgetThisMonth ? (
+          {hasBudgetThisMonth && (
             <TodaysExpenses expenses={todaysExpenses} total={todaysExpensesTotal} />
-          ) : null}
+          )}
         </div>
 
-        {/* Right / wellness column */}
+        {/* ── Right / wellness column ── */}
         <div className="flex flex-col gap-5">
           <FocusSummary
             sessionsThisWeek={focusThisWeek.sessions}
@@ -241,6 +310,14 @@ export default function Dashboard() {
           <HabitsChecklist habits={habitsToday} onToggle={handleToggleHabit} />
         </div>
       </div>
+
+      {/* Quick expense modal */}
+      <QuickExpenseModal
+        open={expenseModalOpen}
+        categories={budgetCategories}
+        onSave={handleQuickExpense}
+        onClose={() => setExpenseModalOpen(false)}
+      />
     </div>
   )
 }

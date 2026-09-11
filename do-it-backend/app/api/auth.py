@@ -40,14 +40,20 @@ COOKIE_MAX_AGE = settings.access_token_expire_minutes * 60
 def _set_auth_cookie(response: Response, token: str) -> None:
     # httpOnly + secure per the blueprint's security requirements —
     # never store the token in localStorage on the frontend.
+    # In cross-origin production (e.g. backend on render.com, frontend on netlify.app),
+    # browsers require SameSite="none" and Secure=True for cookies to be sent with credentials.
+    is_prod = not any("localhost" in origin or "127.0.0.1" in origin for origin in settings.allowed_origins)
+    samesite_val = "none" if is_prod else "lax"
+
     response.set_cookie(
         key="access_token",
         value=token,
         httponly=True,
         secure=True,
-        samesite="lax",
+        samesite=samesite_val,
         max_age=COOKIE_MAX_AGE,
     )
+
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
@@ -114,8 +120,16 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
 
 @router.post("/logout")
 def logout(response: Response):
-    response.delete_cookie("access_token")
+    is_prod = not any("localhost" in origin or "127.0.0.1" in origin for origin in settings.allowed_origins)
+    samesite_val = "none" if is_prod else "lax"
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=True,
+        samesite=samesite_val,
+    )
     return {"detail": "Logged out"}
+
 
 
 @users_router.get("/me", response_model=UserOut)
@@ -247,4 +261,11 @@ def delete_account(
 ):
     db.delete(current_user)  # cascades to preferences, tasks, everything else
     db.commit()
-    response.delete_cookie("access_token")
+    is_prod = not any("localhost" in origin or "127.0.0.1" in origin for origin in settings.allowed_origins)
+    samesite_val = "none" if is_prod else "lax"
+    response.delete_cookie(
+        key="access_token",
+        httponly=True,
+        secure=True,
+        samesite=samesite_val,
+    )

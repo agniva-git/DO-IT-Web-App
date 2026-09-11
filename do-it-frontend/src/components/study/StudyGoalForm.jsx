@@ -3,21 +3,27 @@ import Modal from '../ui/Modal.jsx'
 import Input from '../ui/Input.jsx'
 import Button from '../ui/Button.jsx'
 
-const emptyGoal = { subject: '', target_date: '', hours_per_week: '' }
+const emptyGoal = { subject: '', target_date: '', hours_per_day: '' }
 
 export default function StudyGoalForm({ open, onClose, onSave, editingGoal }) {
   const [form, setForm] = useState(emptyGoal)
 
   useEffect(() => {
-    setForm(
-      editingGoal
-        ? {
-            subject: editingGoal.subject,
-            target_date: editingGoal.target_date,
-            hours_per_week: editingGoal.hours_per_week
-          }
-        : emptyGoal
-    )
+    if (editingGoal) {
+      const dailyHours =
+        editingGoal.hours_per_day !== undefined && editingGoal.hours_per_day !== null
+          ? editingGoal.hours_per_day
+          : editingGoal.hours_per_week
+            ? Math.round((editingGoal.hours_per_week / 7) * 10) / 10
+            : ''
+      setForm({
+        subject: editingGoal.subject,
+        target_date: editingGoal.target_date,
+        hours_per_day: dailyHours
+      })
+    } else {
+      setForm(emptyGoal)
+    }
   }, [editingGoal, open])
 
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }))
@@ -25,7 +31,13 @@ export default function StudyGoalForm({ open, onClose, onSave, editingGoal }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.subject.trim() || !form.target_date) return
-    onSave({ ...form, hours_per_week: Number(form.hours_per_week) || 0 })
+    const daily = Number(form.hours_per_day) || 0
+    onSave({
+      subject: form.subject.trim(),
+      target_date: form.target_date,
+      hours_per_day: daily,
+      hours_per_week: Math.round(daily * 7)
+    })
   }
 
   return (
@@ -49,12 +61,14 @@ export default function StudyGoalForm({ open, onClose, onSave, editingGoal }) {
             required
           />
           <Input
-            id="hours_per_week"
+            id="hours_per_day"
             type="number"
             min="0"
-            label="Hours / week"
-            value={form.hours_per_week}
-            onChange={(e) => update('hours_per_week', e.target.value)}
+            step="0.5"
+            label="Hours / day"
+            placeholder="e.g. 2"
+            value={form.hours_per_day}
+            onChange={(e) => update('hours_per_day', e.target.value)}
           />
         </div>
         <Button type="submit" className="mt-2">

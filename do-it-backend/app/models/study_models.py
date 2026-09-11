@@ -1,7 +1,7 @@
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,6 +19,7 @@ class StudyGoal(Base):
     )
     subject: Mapped[str] = mapped_column(String(100), nullable=False)
     target_date: Mapped[date] = mapped_column(Date, nullable=False)
+    hours_per_day: Mapped[float] = mapped_column(Float, default=0.0, nullable=True)
     hours_per_week: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 

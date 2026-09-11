@@ -7,12 +7,14 @@ from pydantic import BaseModel, Field
 class StudyGoalCreate(BaseModel):
     subject: str = Field(min_length=1, max_length=100)
     target_date: date
+    hours_per_day: float = Field(default=0.0, ge=0)
     hours_per_week: int = Field(default=0, ge=0)
 
 
 class StudyGoalUpdate(BaseModel):
     subject: str | None = Field(default=None, min_length=1, max_length=100)
     target_date: date | None = None
+    hours_per_day: float | None = Field(default=None, ge=0)
     hours_per_week: int | None = Field(default=None, ge=0)
 
 
@@ -20,7 +22,8 @@ class StudyGoalOut(BaseModel):
     id: uuid.UUID
     subject: str
     target_date: date
-    hours_per_week: int
+    hours_per_day: float = 0.0
+    hours_per_week: int = 0
 
     class Config:
         from_attributes = True

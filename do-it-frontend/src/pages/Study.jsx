@@ -13,6 +13,7 @@ import {
   createSession,
   startOfThisWeek
 } from '../api/study.js'
+import { localDateISO } from '../utils/date.js'
 
 export default function Study() {
   const [goals, setGoals] = useState([])
@@ -32,6 +33,17 @@ export default function Study() {
       .catch(() => setError('Could not load study data. Is the backend running?'))
       .finally(() => setLoading(false))
   }, [])
+
+  const minutesTodayBySubject = useMemo(() => {
+    const todayStr = localDateISO()
+    const totals = {}
+    for (const s of sessions) {
+      if (s.date === todayStr) {
+        totals[s.subject] = (totals[s.subject] || 0) + s.duration
+      }
+    }
+    return totals
+  }, [sessions])
 
   const minutesThisWeekBySubject = useMemo(() => {
     const monday = startOfThisWeek()
@@ -111,6 +123,7 @@ export default function Study() {
             <StudyGoalCard
               key={goal.id}
               goal={goal}
+              minutesToday={minutesTodayBySubject[goal.subject] || 0}
               minutesThisWeek={minutesThisWeekBySubject[goal.subject] || 0}
               onEdit={handleEditGoal}
               onDelete={handleDeleteGoal}

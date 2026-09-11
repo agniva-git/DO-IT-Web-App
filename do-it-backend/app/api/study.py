@@ -29,12 +29,16 @@ def _get_owned_goal(goal_id: uuid.UUID, user: User, db: Session) -> StudyGoal:
 def list_goals(
     current_user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):
-    return (
+    goals = (
         db.query(StudyGoal)
         .filter(StudyGoal.user_id == current_user.id)
         .order_by(StudyGoal.target_date.asc())
         .all()
     )
+    for g in goals:
+        if (g.hours_per_day is None or g.hours_per_day == 0) and g.hours_per_week:
+            g.hours_per_day = round(g.hours_per_week / 7, 1)
+    return goals
 
 
 @router.post("/goals", response_model=StudyGoalOut, status_code=status.HTTP_201_CREATED)
@@ -43,7 +47,12 @@ def create_goal(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    goal = StudyGoal(user_id=current_user.id, **payload.model_dump())
+    data = payload.model_dump()
+    if data.get("hours_per_day") and not data.get("hours_per_week"):
+        data["hours_per_week"] = int(round(data["hours_per_day"] * 7))
+    elif data.get("hours_per_week") and not data.get("hours_per_day"):
+        data["hours_per_day"] = round(data["hours_per_week"] / 7, 1)
+    goal = StudyGoal(user_id=current_user.id, **data)
     db.add(goal)
     db.commit()
     db.refresh(goal)
@@ -58,7 +67,12 @@ def update_goal(
     db: Session = Depends(get_db),
 ):
     goal = _get_owned_goal(goal_id, current_user, db)
-    for key, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    if "hours_per_day" in data and "hours_per_week" not in data:
+        data["hours_per_week"] = int(round((data["hours_per_day"] or 0) * 7))
+    elif "hours_per_week" in data and "hours_per_day" not in data:
+        data["hours_per_day"] = round((data["hours_per_week"] or 0) / 7, 1)
+    for key, value in data.items():
         setattr(goal, key, value)
     db.commit()
     db.refresh(goal)

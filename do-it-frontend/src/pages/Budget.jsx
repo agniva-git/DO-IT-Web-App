@@ -32,6 +32,9 @@ export default function Budget() {
   const [expenseCategory, setExpenseCategory] = useState(null)
   const [detailCategory, setDetailCategory] = useState(null)
   const [addCategoryOpen, setAddCategoryOpen] = useState(false)
+  // Inline confirmation state — avoids window.confirm which blocks on mobile.
+  // { type: 'category' | 'month', id } when a delete is pending user confirmation.
+  const [pendingDelete, setPendingDelete] = useState(null)
 
   const loadAll = async () => {
     const summaries = await listMonths()
@@ -98,7 +101,11 @@ export default function Budget() {
   }
 
   const handleDeleteCategory = async (categoryId) => {
-    if (!window.confirm('Delete this category and all its logged expenses?')) return
+    if (!pendingDelete || pendingDelete.type !== 'category' || pendingDelete.id !== categoryId) {
+      setPendingDelete({ type: 'category', id: categoryId })
+      return
+    }
+    setPendingDelete(null)
     const updated = await deleteCategory(categoryId)
     setDetailCategory(null)
     await refreshCurrentAndSummaries(updated)
@@ -110,7 +117,11 @@ export default function Budget() {
   }
 
   const handleDeleteMonth = async (id) => {
-    if (!window.confirm('Delete this month\u2019s budget and all its logged expenses?')) return
+    if (!pendingDelete || pendingDelete.type !== 'month' || pendingDelete.id !== id) {
+      setPendingDelete({ type: 'month', id })
+      return
+    }
+    setPendingDelete(null)
     await deleteMonth(id)
     if (viewingMonth?.id === id) setViewingMonth(null)
     if (currentMonth?.id === id) setCurrentMonth(null)
@@ -138,7 +149,7 @@ export default function Budget() {
   return (
     <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
       <header className="mb-6">
-        <h1 className="font-display text-3xl">Expenses</h1>
+        <h1 className="font-display text-2xl sm:text-3xl">Expenses</h1>
         <p className="text-paper/50 mt-1">Plan it, spend it, see where it went.</p>
       </header>
 
@@ -150,7 +161,7 @@ export default function Budget() {
             <h2 className="font-display text-xl">
               {monthName(activeMonth.month)} {activeMonth.year}
             </h2>
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap items-center">
               {viewingMonth ? (
                 <Button variant="ghost" onClick={() => setViewingMonth(null)}>
                   Back to {monthName(month)}
@@ -160,13 +171,29 @@ export default function Budget() {
                   <Button variant="subtle" onClick={() => setAddCategoryOpen(true)}>
                     + Add category
                   </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => handleDeleteMonth(activeMonth.id)}
-                    className="text-danger border-danger/30 hover:border-danger"
-                  >
-                    Delete & redo
-                  </Button>
+                  {pendingDelete?.type === 'month' && pendingDelete.id === activeMonth.id ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-danger">Sure? This deletes all data.</span>
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleDeleteMonth(activeMonth.id)}
+                        className="text-danger border-danger/30 hover:border-danger"
+                      >
+                        Yes, delete
+                      </Button>
+                      <Button variant="subtle" onClick={() => setPendingDelete(null)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleDeleteMonth(activeMonth.id)}
+                      className="text-danger border-danger/30 hover:border-danger"
+                    >
+                      Delete &amp; redo
+                    </Button>
+                  )}
                 </>
               )}
             </div>

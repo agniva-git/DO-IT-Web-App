@@ -68,9 +68,9 @@ export default function Focus() {
   }
 
   return (
-    <div className="min-h-screen px-6 md:px-12 py-10">
+    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
       <header className="mb-6">
-        <h1 className="font-display text-3xl">Focus</h1>
+        <h1 className="font-display text-2xl sm:text-3xl">Focus</h1>
         <p className="text-paper/50 mt-1">Distraction-free time, on your terms.</p>
       </header>
 

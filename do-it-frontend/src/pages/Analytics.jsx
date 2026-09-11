@@ -7,15 +7,7 @@ import { listSessions as listStudySessions } from '../api/study.js'
 import { listFocusSessions } from '../api/focus.js'
 import { listWorkouts } from '../api/fitness.js'
 import { listHabits, listHabitLogs, calcConsistency } from '../api/habits.js'
-
-// All "recent" stats use a consistent 30-day window, same convention
-// the Habits module already established for consistency %.
-function daysAgoISO(n) {
-  const d = new Date()
-  d.setDate(d.getDate() - n)
-  return d.toISOString().slice(0, 10)
-}
-const THIRTY_DAYS_AGO = daysAgoISO(30)
+import { daysAgoISO } from '../utils/date.js'
 
 export default function Analytics() {
   const [loading, setLoading] = useState(true)
@@ -49,6 +41,10 @@ export default function Analytics() {
   }, [])
 
   const stats = useMemo(() => {
+    // Compute fresh on every render so a tab left open overnight
+    // doesn't use a stale 30-day cutoff.
+    const thirtyDaysAgo = daysAgoISO(30)
+
     const completionRate =
       tasks.length === 0
         ? 0
@@ -56,13 +52,13 @@ export default function Analytics() {
             (tasks.filter((t) => t.status === 'completed').length / tasks.length) * 100
           )
 
-    const recentStudy = studySessions.filter((s) => s.date >= THIRTY_DAYS_AGO)
+    const recentStudy = studySessions.filter((s) => s.date >= thirtyDaysAgo)
     const studyHoursTotal = (
       recentStudy.reduce((sum, s) => sum + s.duration, 0) / 60
     ).toFixed(1)
 
-    const recentFocus = focusSessions.filter((s) => s.date >= THIRTY_DAYS_AGO)
-    const recentWorkouts = workouts.filter((w) => w.date >= THIRTY_DAYS_AGO)
+    const recentFocus = focusSessions.filter((s) => s.date >= thirtyDaysAgo)
+    const recentWorkouts = workouts.filter((w) => w.date >= thirtyDaysAgo)
 
     const habitConsistency =
       habits.length === 0
@@ -83,7 +79,7 @@ export default function Analytics() {
 
   const studyBySubject = useMemo(() => {
     const totals = {}
-    for (const s of studySessions.filter((s) => s.date >= THIRTY_DAYS_AGO)) {
+    for (const s of studySessions.filter((s) => s.date >= daysAgoISO(30))) {
       totals[s.subject] = (totals[s.subject] || 0) + s.duration
     }
     return Object.entries(totals).map(([label, minutes]) => ({
@@ -109,13 +105,14 @@ export default function Analytics() {
 
   const fitnessByBodyPart = useMemo(() => {
     const counts = {}
-    for (const w of workouts.filter((w) => w.date >= THIRTY_DAYS_AGO)) {
+    for (const w of workouts.filter((w) => w.date >= daysAgoISO(30))) {
       for (const part of w.body_parts) {
         counts[part] = (counts[part] || 0) + 1
       }
     }
     return Object.entries(counts).map(([label, value]) => ({ label, value }))
   }, [workouts])
+
 
   const habitsConsistency = useMemo(
     () =>
@@ -135,15 +132,15 @@ export default function Analytics() {
   }
 
   return (
-    <div className="min-h-screen px-6 md:px-12 py-10">
+    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
       <header className="mb-6">
-        <h1 className="font-display text-3xl">Analytics</h1>
+        <h1 className="font-display text-2xl sm:text-3xl">Analytics</h1>
         <p className="text-paper/50 mt-1">What the numbers actually say.</p>
       </header>
 
       {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
         <StatCard label="Completion rate" value={stats.completionRate} unit="%" colorClass="text-plan" />
         <StatCard label="Study hours (30d)" value={stats.studyHoursTotal} unit="h" colorClass="text-plan" />
         <StatCard label="Focus sessions (30d)" value={stats.focusSessionsCount} colorClass="text-focus" />

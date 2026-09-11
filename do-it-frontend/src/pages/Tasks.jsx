@@ -51,7 +51,10 @@ export default function Tasks() {
     if (filter !== 'all') list = list.filter((t) => t.status === filter)
     return [...list].sort((a, b) => {
       if (sort === 'priority') return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority]
-      return a.due_date.localeCompare(b.due_date)
+      // Null due_dates sort to the end rather than throwing.
+      const da = a.due_date ?? '9999-99-99'
+      const db = b.due_date ?? '9999-99-99'
+      return da.localeCompare(db)
     })
   }, [tasks, filter, sort])
 
@@ -62,25 +65,39 @@ export default function Tasks() {
 
   const handleToggleComplete = async (id) => {
     const task = tasks.find((t) => t.id === id)
-    const wasCompleting = task?.status !== 'completed'
-    const updated = await toggleTaskComplete(id)
-    setTasks((ts) => ts.map((t) => (t.id === id ? updated : t)))
-
-    if (wasCompleting && updated.miss_count >= 3) {
-      setMissModalTask(updated)
+    if (!task) return
+    const wasCompleting = task.status !== 'completed'
+    // Optimistic update
+    setTasks((ts) =>
+      ts.map((t) => (t.id === id ? { ...t, status: wasCompleting ? 'completed' : 'pending' } : t))
+    )
+    try {
+      const updated = await toggleTaskComplete(id)
+      setTasks((ts) => ts.map((t) => (t.id === id ? updated : t)))
+      if (wasCompleting && updated.miss_count >= 3) {
+        setMissModalTask(updated)
+      }
+    } catch {
+      // Roll back on failure.
+      setTasks((ts) => ts.map((t) => (t.id === id ? task : t)))
+      setError('Could not update task — please try again.')
     }
   }
 
   const handleSaveTask = async (formData) => {
-    if (editingTask) {
-      const updated = await updateTask(editingTask.id, formData)
-      setTasks((ts) => ts.map((t) => (t.id === editingTask.id ? updated : t)))
-    } else {
-      const created = await createTask(formData)
-      setTasks((ts) => [...ts, created])
+    try {
+      if (editingTask) {
+        const updated = await updateTask(editingTask.id, formData)
+        setTasks((ts) => ts.map((t) => (t.id === editingTask.id ? updated : t)))
+      } else {
+        const created = await createTask(formData)
+        setTasks((ts) => [...ts, created])
+      }
+      setFormOpen(false)
+      setEditingTask(null)
+    } catch {
+      setError('Could not save task — please try again.')
     }
-    setFormOpen(false)
-    setEditingTask(null)
   }
 
   const handleEdit = (task) => {
@@ -89,8 +106,16 @@ export default function Tasks() {
   }
 
   const handleDelete = async (id) => {
-    await deleteTask(id)
+    // Optimistic
+    const removed = tasks.find((t) => t.id === id)
     setTasks((ts) => ts.filter((t) => t.id !== id))
+    try {
+      await deleteTask(id)
+    } catch {
+      // Restore on failure
+      if (removed) setTasks((ts) => [...ts, removed])
+      setError('Could not delete task — please try again.')
+    }
   }
 
   const handleMissReasonSubmit = async (reason) => {

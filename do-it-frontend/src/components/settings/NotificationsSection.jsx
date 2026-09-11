@@ -1,18 +1,34 @@
 import Card from '../ui/Card.jsx'
 import Toggle from '../ui/Toggle.jsx'
 
-export default function NotificationsSection({ settings, onChange }) {
+export default function NotificationsSection({ settings, onChange, permissionStatus }) {
   const update = (key, value) => onChange({ ...settings, [key]: value })
+
+  const denied = permissionStatus === 'denied'
+  const unsupported = permissionStatus === 'unsupported'
 
   return (
     <Card>
       <h3 className="font-display text-lg mb-4">Notifications</h3>
       <div className="flex flex-col gap-4">
-        <Toggle
-          label="Browser notifications"
-          checked={settings.browser}
-          onChange={(v) => update('browser', v)}
-        />
+        <div className="flex flex-col gap-1.5">
+          <Toggle
+            label="Browser notifications"
+            checked={settings.browser}
+            onChange={(v) => update('browser', v)}
+            disabled={unsupported}
+          />
+          {unsupported && (
+            <p className="text-xs text-paper/40 pl-1">
+              Your browser does not support notifications.
+            </p>
+          )}
+          {denied && (
+            <p className="text-xs text-warn pl-1">
+              Notifications are blocked — open your browser's site settings to allow them, then toggle again.
+            </p>
+          )}
+        </div>
         <Toggle
           label="Email notifications"
           checked={settings.email}

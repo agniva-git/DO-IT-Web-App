@@ -41,15 +41,25 @@ export default function Habits() {
   )
 
   const handleAddHabit = async (habit) => {
-    const created = await createHabit(habit)
-    setHabits((hs) => [...hs, created])
-    setFormOpen(false)
+    try {
+      const created = await createHabit(habit)
+      setHabits((hs) => [...hs, created])
+      setFormOpen(false)
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Could not create habit — please try again.')
+    }
   }
 
   const handleDeleteHabit = async (id) => {
-    await deleteHabit(id)
+    const removed = habits.find((h) => h.id === id)
     setHabits((hs) => hs.filter((h) => h.id !== id))
     setLogs((ls) => ls.filter((l) => l.habit_id !== id))
+    try {
+      await deleteHabit(id)
+    } catch {
+      if (removed) setHabits((hs) => [...hs, removed])
+      setError('Could not delete habit — please try again.')
+    }
   }
 
   const handleToggleToday = async (habitId) => {
@@ -95,10 +105,10 @@ export default function Habits() {
   }
 
   return (
-    <div className="min-h-screen px-6 md:px-12 py-10">
+    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
       <header className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="font-display text-3xl">Habits</h1>
+          <h1 className="font-display text-2xl sm:text-3xl">Habits</h1>
           <p className="text-paper/50 mt-1">Small, repeated, consistent.</p>
         </div>
         <Button onClick={() => setFormOpen(true)}>+ Add habit</Button>

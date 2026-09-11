@@ -4,8 +4,9 @@ import Input from '../ui/Input.jsx'
 import Button from '../ui/Button.jsx'
 import OptionGroup from '../ui/OptionGroup.jsx'
 import { DEFAULT_CATEGORIES, PRIORITIES } from '../../api/tasks.js'
+import { localDateISO } from '../../utils/date.js'
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = localDateISO
 
 const emptyForm = {
   title: '',

@@ -68,16 +68,24 @@ export default function Fitness() {
   }
 
   const handleLogWorkout = async (workout) => {
-    const created = await createWorkout(workout)
-    setWorkouts((ws) => [...ws, created])
-    setFormOpen(false)
-    setPendingBodyParts([])
+    try {
+      const created = await createWorkout(workout)
+      setWorkouts((ws) => [...ws, created])
+      setFormOpen(false)
+      setPendingBodyParts([])
+    } catch {
+      setError('Could not log workout — please try again.')
+    }
   }
 
   const handleSaveGoal = async (updates) => {
-    const updated = await updatePreferences(updates)
-    setPreferences(updated)
-    setGoalModalOpen(false)
+    try {
+      const updated = await updatePreferences(updates)
+      setPreferences(updated)
+      setGoalModalOpen(false)
+    } catch {
+      setError('Could not save goal — please try again.')
+    }
   }
 
   if (loading) {
@@ -89,9 +97,9 @@ export default function Fitness() {
   }
 
   return (
-    <div className="min-h-screen px-6 md:px-12 py-10">
+    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
       <header className="mb-6">
-        <h1 className="font-display text-3xl">Fitness</h1>
+        <h1 className="font-display text-2xl sm:text-3xl">Fitness</h1>
         <p className="text-paper/50 mt-1">
           {goalIsNone
             ? "We'll focus on your productivity and study goals."

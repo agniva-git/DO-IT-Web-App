@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import TodayProgress from '../components/dashboard/TodayProgress.jsx'
 import TodaysTasks from '../components/dashboard/TodaysTasks.jsx'
@@ -8,36 +9,26 @@ import TodaysExpenses from '../components/dashboard/TodaysExpenses.jsx'
 import FocusSummary from '../components/dashboard/FocusSummary.jsx'
 import FitnessSummary from '../components/dashboard/FitnessSummary.jsx'
 import HabitsChecklist from '../components/dashboard/HabitsChecklist.jsx'
-import AIInsightCard from '../components/dashboard/AIInsightCard.jsx'
+import QuickActions from '../components/dashboard/QuickActions.jsx'
 import Card from '../components/ui/Card.jsx'
-import { listTasks } from '../api/tasks.js'
+import { listTasks, createTask } from '../api/tasks.js'
 import { listFocusSessions } from '../api/focus.js'
 import { listWorkouts, getPreferences } from '../api/fitness.js'
 import { listHabits, listHabitLogs, checkIn, todayISO } from '../api/habits.js'
 import { listMonths, getMonth, listMonthExpenses, currentYearMonth } from '../api/budget.js'
+import {
+  localDateISO,
+  startOfThisWeek,
+  startOfThisMonth,
+  greeting,
+  formatDateLong
+} from '../utils/date.js'
 
 const PRIORITY_RANK = { high: 0, medium: 1, low: 2 }
 
-function startOfThisWeek() {
-  const now = new Date()
-  const day = now.getDay() === 0 ? 7 : now.getDay()
-  const monday = new Date(now)
-  monday.setDate(now.getDate() - (day - 1))
-  monday.setHours(0, 0, 0, 0)
-  return monday
-}
-
-function startOfThisMonth() {
-  const now = new Date()
-  return new Date(now.getFullYear(), now.getMonth(), 1)
-}
-
-function formatDate(d) {
-  return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
-}
-
 export default function Dashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -68,14 +59,15 @@ export default function Dashboard() {
       setHabits(h)
       setHabitLogs(logs)
 
-      // Expenses live under a specific month's id — find this calendar
-      // month's budget (if one exists) before we can fetch its expenses.
       const { year, month } = currentYearMonth()
       const currentBudget = budgetMonths.find((m) => m.year === year && m.month === month)
       if (currentBudget) {
         setHasBudgetThisMonth(true)
-        const allExpenses = await listMonthExpenses(currentBudget.id)
-        setTodaysExpenses(allExpenses.filter((e) => e.date === todayISO()))
+        const allExpenses = await getMonth(currentBudget.id)
+        // listMonthExpenses returns flat list; getMonth has categories with expenses nested.
+        // Use listMonthExpenses for today's flat view.
+        const flat = await listMonthExpenses(currentBudget.id)
+        setTodaysExpenses(flat.filter((e) => e.date === localDateISO()))
       }
     }
 
@@ -84,8 +76,9 @@ export default function Dashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  const today = todayISO()
+  const today = localDateISO()
 
+  // Tasks due today, sorted: incomplete first, then by priority.
   const todaysTasks = useMemo(() => {
     return tasks
       .filter((t) => t.due_date === today)
@@ -95,7 +88,16 @@ export default function Dashboard() {
       })
   }, [tasks, today])
 
+  // Overdue: past due date and not completed.
+  const overdueTasks = useMemo(() => {
+    return tasks
+      .filter((t) => t.due_date && t.due_date < today && t.status !== 'completed')
+      .sort((a, b) => a.due_date.localeCompare(b.due_date))
+  }, [tasks, today])
+
   const tasksCompleted = todaysTasks.filter((t) => t.status === 'completed').length
+  // Include overdue tasks in the total so the progress bar is honest.
+  const tasksTotal = todaysTasks.length + overdueTasks.length
 
   const todaysFocusSessions = useMemo(
     () => focusSessions.filter((s) => s.date === today),
@@ -182,35 +184,41 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
-      <header className="mb-8">
-        <h1 className="font-display text-3xl">
-          Good {new Date().getHours() < 12 ? 'morning' : 'day'}, {user?.name} 👋
+    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-8 sm:py-10">
+      <header className="mb-6">
+        <h1 className="font-display text-2xl sm:text-3xl">
+          Good {greeting()}, {user?.name} 👋
         </h1>
-        <p className="text-paper/50 mt-1">{formatDate(new Date())}</p>
+        <p className="text-paper/50 mt-1 text-sm sm:text-base">{formatDateLong(new Date())}</p>
       </header>
 
       {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      {/* Quick-action chips */}
+      <QuickActions
+        onStartFocus={() => navigate('/focus')}
+        onAddTask={() => navigate('/tasks')}
+        onLogWorkout={() => navigate('/fitness')}
+        onLogExpense={() => navigate('/budget')}
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-6">
+        {/* Left / main column */}
         <div className="lg:col-span-2 flex flex-col gap-5">
-          <TodayProgress completed={tasksCompleted} total={todaysTasks.length} />
-          <TodaysTasks tasks={todaysTasks} />
-          <TodaysFocusSessions sessions={todaysFocusSessions} />
-          <TodaysWorkouts workouts={todaysWorkouts} />
+          <TodayProgress completed={tasksCompleted} total={tasksTotal} />
+          <TodaysTasks tasks={todaysTasks} overdueTasks={overdueTasks} />
+          {todaysFocusSessions.length > 0 && (
+            <TodaysFocusSessions sessions={todaysFocusSessions} />
+          )}
+          {todaysWorkouts.length > 0 && (
+            <TodaysWorkouts workouts={todaysWorkouts} />
+          )}
           {hasBudgetThisMonth ? (
             <TodaysExpenses expenses={todaysExpenses} total={todaysExpensesTotal} />
-          ) : (
-            <Card>
-              <h3 className="font-display text-lg mb-2 text-good">Spent today</h3>
-              <p className="text-sm text-paper/50">
-                No budget set up for this month yet — head to Expenses to start tracking.
-              </p>
-            </Card>
-          )}
-          <AIInsightCard insight="Weekly reflections and personalized suggestions will appear here once the AI Coach ships." />
+          ) : null}
         </div>
 
+        {/* Right / wellness column */}
         <div className="flex flex-col gap-5">
           <FocusSummary
             sessionsThisWeek={focusThisWeek.sessions}

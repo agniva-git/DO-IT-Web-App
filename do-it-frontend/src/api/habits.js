@@ -1,4 +1,5 @@
 import api from './client.js'
+import { localDateISO, daysAgoISO as _daysAgoISO } from '../utils/date.js'
 
 export const listHabits = () => api.get('/habits').then((res) => res.data)
 
@@ -11,9 +12,10 @@ export const listHabitLogs = () => api.get('/habits/logs').then((res) => res.dat
 export const checkIn = (habitId, date, completed) =>
   api.post(`/habits/${habitId}/check-in`, { date, completed }).then((res) => res.data)
 
-export function todayISO() {
-  return new Date().toISOString().slice(0, 10)
-}
+// Re-exported as todayISO so existing callers (Dashboard, Habits page, etc.)
+// don't need mass-import updates — they still import { todayISO } from './habits'.
+export const todayISO = localDateISO
+
 
 // Current streak: consecutive successful days counting back from today.
 // If today isn't logged yet, counts from yesterday so an unmarked

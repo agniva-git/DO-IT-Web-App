@@ -1,0 +1,28 @@
+/**
+ * Four quick-action chips at the top of the Dashboard.
+ * They navigate to the relevant page — no inline modals needed since
+ * each destination already has the full form experience.
+ */
+export default function QuickActions({ onStartFocus, onAddTask, onLogWorkout, onLogExpense }) {
+  const actions = [
+    { label: '⏱ Focus', handler: onStartFocus, color: 'text-focus border-focus/30 hover:bg-focus/10' },
+    { label: '✅ Task', handler: onAddTask, color: 'text-plan border-plan/30 hover:bg-plan/10' },
+    { label: '💪 Workout', handler: onLogWorkout, color: 'text-move border-move/30 hover:bg-move/10' },
+    { label: '💸 Expense', handler: onLogExpense, color: 'text-good border-good/30 hover:bg-good/10' }
+  ]
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {actions.map(({ label, handler, color }) => (
+        <button
+          key={label}
+          type="button"
+          onClick={handler}
+          className={`px-4 py-2 rounded-card border text-sm font-medium transition-colors ${color}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}

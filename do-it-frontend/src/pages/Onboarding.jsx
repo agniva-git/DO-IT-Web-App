@@ -4,6 +4,8 @@ import Card from '../components/ui/Card.jsx'
 import Input from '../components/ui/Input.jsx'
 import Button from '../components/ui/Button.jsx'
 import OptionGroup from '../components/ui/OptionGroup.jsx'
+import { updatePreferences } from '../api/settings.js'
+import { createHabit } from '../api/habits.js'
 
 // Gender and fitness goal are now collected at registration instead of
 // here — front-loaded since they're more structural. Educational "goals"
@@ -20,6 +22,8 @@ const STEPS = ['student', 'education', 'habitBuild', 'habitLeave']
 export default function Onboarding() {
   const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({
     isStudent: '',
     educationType: '',
@@ -49,12 +53,45 @@ export default function Onboarding() {
     }
   }
 
-  const handleNext = () => {
-    if (!canContinue()) return
+  const handleNext = async () => {
+    if (!canContinue() || submitting) return
     if (isLast) {
-      // Wired to PATCH /users/me/preferences (onboarding_completed=true)
-      // + habit creation once the backend is live.
-      navigate('/dashboard')
+      setSubmitting(true)
+      setError('')
+      try {
+        // 1. Mark onboarding as completed in backend preferences
+        await updatePreferences({ onboarding_completed: true })
+
+        // 2. Create the chosen build habit if provided
+        const buildHabitName =
+          form.habitBuild === 'Something else'
+            ? form.habitBuildCustom.trim()
+            : form.habitBuild.trim()
+
+        if (buildHabitName) {
+          try {
+            await createHabit({ name: buildHabitName, type: 'build', frequency: 'daily' })
+          } catch {
+            // Non-fatal if habit name collides or fails
+          }
+        }
+
+        // 3. Create the chosen leave habit if provided
+        const leaveHabitName = form.habitLeave.trim()
+        if (leaveHabitName) {
+          try {
+            await createHabit({ name: leaveHabitName, type: 'leave', frequency: 'daily' })
+          } catch {
+            // Non-fatal
+          }
+        }
+
+        navigate('/dashboard')
+      } catch {
+        setError('Could not save onboarding preferences. Please try again.')
+      } finally {
+        setSubmitting(false)
+      }
       return
     }
     setStepIndex((i) => i + 1)
@@ -145,12 +182,14 @@ export default function Onboarding() {
             </>
           )}
 
+          {error && <p className="text-sm text-danger">{error}</p>}
+
           <div className="flex justify-between pt-2">
-            <Button variant="ghost" onClick={handleBack} disabled={stepIndex === 0}>
+            <Button variant="ghost" onClick={handleBack} disabled={stepIndex === 0 || submitting}>
               Back
             </Button>
-            <Button onClick={handleNext} disabled={!canContinue()}>
-              {isLast ? 'Finish setup' : 'Continue'}
+            <Button onClick={handleNext} disabled={!canContinue() || submitting}>
+              {submitting ? 'Finishing setup…' : isLast ? 'Finish setup' : 'Continue'}
             </Button>
           </div>
         </Card>

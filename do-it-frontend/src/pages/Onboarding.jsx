@@ -17,8 +17,6 @@ const HABIT_SUGGESTIONS = [
   'Reading', 'Sketching', 'Playing chess', 'Journaling', 'Coding practice', 'Something else'
 ]
 
-const STEPS = ['student', 'education', 'habitBuild', 'habitLeave']
-
 export default function Onboarding() {
   const navigate = useNavigate()
   const [stepIndex, setStepIndex] = useState(0)
@@ -33,8 +31,13 @@ export default function Onboarding() {
     habitLeave: ''
   })
 
-  const step = STEPS[stepIndex]
-  const isLast = stepIndex === STEPS.length - 1
+  // If the user says they are not a student, skip the education questions entirely
+  const steps = form.isStudent === 'no'
+    ? ['student', 'habitBuild', 'habitLeave']
+    : ['student', 'education', 'habitBuild', 'habitLeave']
+
+  const step = steps[stepIndex] || steps[0]
+  const isLast = stepIndex === steps.length - 1
 
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }))
 
@@ -107,12 +110,12 @@ export default function Onboarding() {
       <div className="w-full max-w-md flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <span className="font-mono text-xs uppercase tracking-widest text-paper/40">
-            Step {stepIndex + 1} of {STEPS.length}
+            Step {stepIndex + 1} of {steps.length}
           </span>
           <div className="h-1 bg-line rounded-full overflow-hidden">
             <div
               className="h-full bg-plan transition-all duration-300"
-              style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
+              style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }}
             />
           </div>
         </div>

@@ -38,13 +38,21 @@ export default function Settings() {
   }, [])
 
   const handleSaveProfile = async (updates) => {
-    const updated = await updateProfile(updates)
-    setProfile(updated)
+    try {
+      const updated = await updateProfile(updates)
+      setProfile(updated)
+    } catch {
+      setError('Could not save profile — please try again.')
+    }
   }
 
   const handleSavePreferences = async (updates) => {
-    const updated = await updatePreferences(updates)
-    setPreferences(updated)
+    try {
+      const updated = await updatePreferences(updates)
+      setPreferences(updated)
+    } catch {
+      setError('Could not save preferences — please try again.')
+    }
   }
 
   const handleAccountDeleted = async () => {

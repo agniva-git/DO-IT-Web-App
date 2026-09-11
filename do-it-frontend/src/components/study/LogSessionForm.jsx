@@ -3,8 +3,9 @@ import Modal from '../ui/Modal.jsx'
 import Input from '../ui/Input.jsx'
 import Button from '../ui/Button.jsx'
 import OptionGroup from '../ui/OptionGroup.jsx'
+import { localDateISO } from '../../utils/date.js'
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = localDateISO
 
 export default function LogSessionForm({ open, onClose, onSave, subjects }) {
   const [subject, setSubject] = useState(subjects[0]?.subject || '')

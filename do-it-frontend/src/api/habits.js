@@ -26,12 +26,12 @@ export function calcStreak(logs, habitId) {
   )
   let streak = 0
   let cursor = new Date()
-  const todayKey = cursor.toISOString().slice(0, 10)
+  const todayKey = localDateISO(cursor)
   if (byDate.get(todayKey) !== true) {
     cursor.setDate(cursor.getDate() - 1)
   }
   while (true) {
-    const key = cursor.toISOString().slice(0, 10)
+    const key = localDateISO(cursor)
     if (byDate.get(key) === true) {
       streak += 1
       cursor.setDate(cursor.getDate() - 1)
@@ -63,7 +63,7 @@ export function lastNDays(logs, habitId, n = 14) {
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date()
     d.setDate(d.getDate() - i)
-    const key = d.toISOString().slice(0, 10)
+    const key = localDateISO(d)
     days.push({ date: key, completed: byDate.get(key) === true })
   }
   return days

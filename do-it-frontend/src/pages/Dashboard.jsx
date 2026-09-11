@@ -11,8 +11,9 @@ import FitnessSummary from '../components/dashboard/FitnessSummary.jsx'
 import HabitsChecklist from '../components/dashboard/HabitsChecklist.jsx'
 import QuickActions from '../components/dashboard/QuickActions.jsx'
 import QuickExpenseModal from '../components/dashboard/QuickExpenseModal.jsx'
+import AddTaskForm from '../components/tasks/AddTaskForm.jsx'
 import Card from '../components/ui/Card.jsx'
-import { listTasks, toggleTaskComplete } from '../api/tasks.js'
+import { listTasks, toggleTaskComplete, createTask } from '../api/tasks.js'
 import { listFocusSessions } from '../api/focus.js'
 import { listWorkouts, getPreferences } from '../api/fitness.js'
 import { listHabits, listHabitLogs, checkIn, todayISO } from '../api/habits.js'
@@ -52,6 +53,13 @@ export default function Dashboard() {
 
   // Quick expense modal state
   const [expenseModalOpen, setExpenseModalOpen] = useState(false)
+  // Quick task modal state
+  const [taskModalOpen, setTaskModalOpen] = useState(false)
+
+  const knownCategories = useMemo(
+    () => [...new Set(tasks.map((t) => t.category))],
+    [tasks]
+  )
 
   useEffect(() => {
     const loadEverything = async () => {
@@ -207,6 +215,17 @@ export default function Dashboard() {
     setExpenseModalOpen(false)
   }
 
+  // Quick add task from Dashboard
+  const handleQuickAddTask = async (formData) => {
+    try {
+      const created = await createTask(formData)
+      setTasks((ts) => [...ts, created])
+      setTaskModalOpen(false)
+    } catch {
+      setError('Could not save task — please try again.')
+    }
+  }
+
   const handleToggleHabit = async (habitId) => {
     const existing = habitLogs.find((l) => l.habit_id === habitId && l.date === today)
     const nextCompleted = existing ? !existing.completed : true
@@ -259,7 +278,7 @@ export default function Dashboard() {
       {/* Quick-action chips */}
       <QuickActions
         onStartFocus={() => navigate('/focus')}
-        onAddTask={() => navigate('/tasks')}
+        onAddTask={() => setTaskModalOpen(true)}
         onLogWorkout={() => navigate('/fitness')}
         onLogExpense={() => setExpenseModalOpen(true)}
       />
@@ -317,6 +336,14 @@ export default function Dashboard() {
         categories={budgetCategories}
         onSave={handleQuickExpense}
         onClose={() => setExpenseModalOpen(false)}
+      />
+
+      {/* Quick add task modal */}
+      <AddTaskForm
+        open={taskModalOpen}
+        onClose={() => setTaskModalOpen(false)}
+        onSave={handleQuickAddTask}
+        knownCategories={knownCategories}
       />
     </div>
   )

@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import Modal from '../ui/Modal.jsx'
 import Input from '../ui/Input.jsx'
 import Button from '../ui/Button.jsx'
+import { localDateISO } from '../../utils/date.js'
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = localDateISO
 
 // bodyParts arrives pre-selected from BodyPartPicker — this form just
 // confirms duration/date before the session is saved to history.

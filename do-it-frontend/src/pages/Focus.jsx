@@ -6,6 +6,7 @@ import OptionGroup from '../components/ui/OptionGroup.jsx'
 import FocusTimer from '../components/focus/FocusTimer.jsx'
 import FocusSessionHistory from '../components/focus/FocusSessionHistory.jsx'
 import { FOCUS_PRESETS, listFocusSessions, createFocusSession } from '../api/focus.js'
+import { localDateISO } from '../utils/date.js'
 
 export default function Focus() {
   const [sessions, setSessions] = useState([])
@@ -37,15 +38,20 @@ export default function Focus() {
   }
 
   const handleEnd = async (status, minutesDone) => {
-    const created = await createFocusSession({
-      label: activeSession.label,
-      planned_minutes: activeSession.totalMinutes,
-      date: new Date().toISOString().slice(0, 10),
-      status
-    })
-    setSessions((ss) => [...ss, created])
-    setActiveSession(null)
-    setLabel('')
+    try {
+      const created = await createFocusSession({
+        label: activeSession.label,
+        planned_minutes: activeSession.totalMinutes,
+        date: localDateISO(),
+        status
+      })
+      setSessions((ss) => [...ss, created])
+    } catch {
+      setError('Could not save focus session.')
+    } finally {
+      setActiveSession(null)
+      setLabel('')
+    }
   }
 
   if (activeSession) {

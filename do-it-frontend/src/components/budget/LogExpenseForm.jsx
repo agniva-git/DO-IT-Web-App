@@ -2,8 +2,9 @@ import { useState } from 'react'
 import Modal from '../ui/Modal.jsx'
 import Input from '../ui/Input.jsx'
 import Button from '../ui/Button.jsx'
+import { localDateISO } from '../../utils/date.js'
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = localDateISO
 
 export default function LogExpenseForm({ open, category, onClose, onSave }) {
   const [amount, setAmount] = useState('')

@@ -41,7 +41,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
           onChange={(e) => setName(e.target.value)}
           required
         />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <OptionGroup
             options={[
               { value: 'percentage', label: '%' },
@@ -58,7 +58,7 @@ export default function AddCategoryModal({ open, onClose, onSave }) {
             placeholder={mode === 'percentage' ? '% of income' : 'Amount'}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            className="flex-1"
+            className="w-full sm:flex-1"
           />
         </div>
         <Button type="submit" className="mt-2">

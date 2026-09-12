@@ -127,7 +127,7 @@ export default function BudgetSetupForm({ monthLabel, onSubmit, submitting, erro
 
       <Card>
         <h3 className="font-display text-lg mb-3">How much do you want to save?</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <OptionGroup
             options={[
               { value: 'percentage', label: '%' },
@@ -144,7 +144,7 @@ export default function BudgetSetupForm({ monthLabel, onSubmit, submitting, erro
             placeholder={savingsMode === 'percentage' ? '% of income' : 'Amount'}
             value={savingsValue}
             onChange={(e) => setSavingsValue(e.target.value)}
-            className="flex-1"
+            className="w-full sm:flex-1"
           />
         </div>
       </Card>

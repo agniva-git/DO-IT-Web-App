@@ -152,7 +152,7 @@ export default function FocusTimer({ label, totalMinutes, breakMinutes, onEnd })
   const isBreak = phase === 'break'
 
   return (
-    <div className="fixed inset-0 bg-ink z-40 flex flex-col items-center justify-center gap-8 px-6">
+    <div className="fixed inset-0 bg-ink z-40 flex flex-col items-center justify-center gap-6 sm:gap-8 px-4 py-8 overflow-y-auto">
       <span
         className={`font-mono text-xs uppercase tracking-widest ${isBreak ? 'text-move' : 'text-focus'}`}
       >

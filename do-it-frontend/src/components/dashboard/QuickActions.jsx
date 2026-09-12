@@ -29,13 +29,13 @@ export default function QuickActions({ onStartFocus, onAddTask, onLogWorkout, on
   ]
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-2.5">
       {actions.map(({ label, handler, color }) => (
         <button
           key={label}
           type="button"
           onClick={handler}
-          className={`px-4 py-2 rounded-card border text-sm font-medium transition-colors ${color}`}
+          className={`flex items-center justify-center py-2.5 px-3 sm:px-4 rounded-card border text-sm font-medium transition-colors ${color}`}
         >
           {label}
         </button>

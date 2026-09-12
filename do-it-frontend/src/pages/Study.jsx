@@ -93,10 +93,10 @@ export default function Study() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
-      <header className="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div className="min-h-screen px-3.5 py-4 sm:px-6 sm:py-8 md:px-10 md:py-10">
+      <header className="flex items-center justify-between mb-5 flex-wrap gap-2.5">
         <h1 className="font-display text-2xl sm:text-3xl">Study</h1>
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
           <Button variant="subtle" onClick={() => setSessionFormOpen(true)} disabled={goals.length === 0}>
             Log session
           </Button>

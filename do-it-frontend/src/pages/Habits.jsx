@@ -105,11 +105,11 @@ export default function Habits() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
-      <header className="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div className="min-h-screen px-3.5 py-4 sm:px-6 sm:py-8 md:px-10 md:py-10">
+      <header className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div>
           <h1 className="font-display text-2xl sm:text-3xl">Habits</h1>
-          <p className="text-paper/50 mt-1">Small, repeated, consistent.</p>
+          <p className="text-paper/50 mt-0.5 text-sm sm:text-base">Small, repeated, consistent.</p>
         </div>
         <Button onClick={() => setFormOpen(true)}>+ Add habit</Button>
       </header>

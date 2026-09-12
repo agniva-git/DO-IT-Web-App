@@ -22,7 +22,7 @@ export default function CategoryInputRow({ category, onChange, onRemove }) {
           Remove
         </button>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
         <OptionGroup
           options={[
             { value: 'percentage', label: '%' },
@@ -39,7 +39,7 @@ export default function CategoryInputRow({ category, onChange, onRemove }) {
           placeholder={category.input_mode === 'percentage' ? '% of income' : 'Amount'}
           value={category.value}
           onChange={(e) => update('value', e.target.value)}
-          className="flex-1"
+          className="w-full sm:flex-1"
         />
       </div>
     </div>

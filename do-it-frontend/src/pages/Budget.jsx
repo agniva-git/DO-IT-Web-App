@@ -147,10 +147,10 @@ export default function Budget() {
     : []
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
-      <header className="mb-6">
+    <div className="min-h-screen px-3.5 py-4 sm:px-6 sm:py-8 md:px-10 md:py-10">
+      <header className="mb-5">
         <h1 className="font-display text-2xl sm:text-3xl">Expenses</h1>
-        <p className="text-paper/50 mt-1">Plan it, spend it, see where it went.</p>
+        <p className="text-paper/50 mt-0.5 text-sm sm:text-base">Plan it, spend it, see where it went.</p>
       </header>
 
       {error && <p className="text-sm text-danger mb-4">{error}</p>}

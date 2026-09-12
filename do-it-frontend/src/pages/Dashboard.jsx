@@ -264,7 +264,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-8 sm:py-10">
+    <div className="min-h-screen px-3.5 py-4 sm:px-6 sm:py-8 md:px-10 md:py-10">
       <header className="mb-5">
         <h1 className="font-display text-2xl sm:text-3xl">
           Hello, {user?.name} 👋

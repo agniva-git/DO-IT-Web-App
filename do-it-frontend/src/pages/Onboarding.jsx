@@ -106,7 +106,7 @@ export default function Onboarding() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
       <div className="w-full max-w-md flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <span className="font-mono text-xs uppercase tracking-widest text-paper/40">

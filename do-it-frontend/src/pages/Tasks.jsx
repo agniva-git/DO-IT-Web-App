@@ -147,8 +147,8 @@ export default function Tasks() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
-      <header className="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div className="min-h-screen px-3.5 py-4 sm:px-6 sm:py-8 md:px-10 md:py-10">
+      <header className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <h1 className="font-display text-2xl sm:text-3xl">Tasks</h1>
         <Button
           onClick={() => {
@@ -162,13 +162,13 @@ export default function Tasks() {
 
       {error && <p className="text-sm text-danger mb-4">{error}</p>}
 
-      <div className="flex flex-wrap gap-6 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3.5 sm:gap-6 mb-6">
         <div>
-          <span className="text-xs text-paper/40 uppercase tracking-wide block mb-2">Filter</span>
+          <span className="text-xs text-paper/40 uppercase tracking-wide block mb-1.5">Filter</span>
           <OptionGroup options={FILTERS} value={filter} onChange={setFilter} />
         </div>
         <div>
-          <span className="text-xs text-paper/40 uppercase tracking-wide block mb-2">Sort by</span>
+          <span className="text-xs text-paper/40 uppercase tracking-wide block mb-1.5">Sort by</span>
           <OptionGroup options={SORTS} value={sort} onChange={setSort} />
         </div>
       </div>

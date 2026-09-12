@@ -118,8 +118,8 @@ export default function Register() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm flex flex-col gap-6">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
+      <div className="w-full max-w-md flex flex-col gap-6">
         <div className="text-center flex flex-col gap-1">
           <span className="font-display text-2xl">DO-IT</span>
           <p className="text-paper/50 text-sm">Set up your account.</p>

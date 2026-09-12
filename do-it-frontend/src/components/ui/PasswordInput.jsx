@@ -14,7 +14,7 @@ export default function PasswordInput({ label, id, error, className = '', ...pro
         <input
           id={id}
           type={visible ? 'text' : 'password'}
-          className={`w-full bg-surface border border-line rounded-card px-4 py-3 pr-16 text-paper placeholder:text-paper/30 focus:border-plan outline-none transition-colors ${className}`}
+          className={`w-full bg-surface border border-line rounded-card px-4 py-3 pr-16 text-base sm:text-sm text-paper placeholder:text-paper/30 focus:border-plan outline-none transition-colors ${className}`}
           {...props}
         />
         <button

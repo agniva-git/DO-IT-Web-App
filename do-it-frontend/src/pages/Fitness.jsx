@@ -97,10 +97,10 @@ export default function Fitness() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 md:px-12 py-10">
-      <header className="mb-6">
+    <div className="min-h-screen px-3.5 py-4 sm:px-6 sm:py-8 md:px-10 md:py-10">
+      <header className="mb-5">
         <h1 className="font-display text-2xl sm:text-3xl">Fitness</h1>
-        <p className="text-paper/50 mt-1">
+        <p className="text-paper/50 mt-0.5 text-sm sm:text-base">
           {goalIsNone
             ? "We'll focus on your productivity and study goals."
             : 'Keep it simple — consistency over intensity.'}

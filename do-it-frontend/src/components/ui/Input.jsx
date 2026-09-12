@@ -18,7 +18,7 @@ export default function Input({ label, id, error, className = '', type, onWheel,
         id={id}
         type={type}
         onWheel={handleWheel}
-        className={`bg-surface border border-line rounded-card px-4 py-3 text-paper placeholder:text-paper/30 focus:border-plan outline-none transition-colors ${className}`}
+        className={`bg-surface border border-line rounded-card px-4 py-3 text-base sm:text-sm text-paper placeholder:text-paper/30 focus:border-plan outline-none transition-colors ${className}`}
         {...props}
       />
       {error && <p className="text-sm text-danger">{error}</p>}

@@ -100,11 +100,12 @@ export default function Study() {
   }
 
   const handleDeleteSession = async (id) => {
+    setError('')
     try {
       await deleteSession(id)
       setSessions((ss) => ss.filter((s) => s.id !== id))
-    } catch {
-      setError('Could not delete session. Please try again.')
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Could not delete session. Please try again.')
     }
   }
 

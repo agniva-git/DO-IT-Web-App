@@ -123,8 +123,12 @@ def delete_session(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    session = db.get(StudySession, session_id)
-    if not session or session.user_id != current_user.id:
+    session = (
+        db.query(StudySession)
+        .filter(StudySession.id == session_id, StudySession.user_id == current_user.id)
+        .first()
+    )
+    if not session:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Study session not found")
     db.delete(session)
     db.commit()

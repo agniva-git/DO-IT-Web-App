@@ -4,8 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.models.study_models import StudyGoal, StudySession
 from app.models.user import User
+from app.models.study_models import StudyGoal, StudySession
 from app.schemas.study_schemas import (
     StudyGoalCreate,
     StudyGoalOut,

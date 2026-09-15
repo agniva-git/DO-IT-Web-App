@@ -9,6 +9,7 @@ class StudyGoalCreate(BaseModel):
     target_date: date
     hours_per_day: float = Field(default=0.0, ge=0)
     hours_per_week: int = Field(default=0, ge=0)
+    target_hours: float | None = Field(default=0.0, ge=0)
 
 
 class StudyGoalUpdate(BaseModel):
@@ -16,6 +17,7 @@ class StudyGoalUpdate(BaseModel):
     target_date: date | None = None
     hours_per_day: float | None = Field(default=None, ge=0)
     hours_per_week: int | None = Field(default=None, ge=0)
+    target_hours: float | None = Field(default=None, ge=0)
 
 
 class StudyGoalOut(BaseModel):
@@ -24,6 +26,7 @@ class StudyGoalOut(BaseModel):
     target_date: date
     hours_per_day: float = 0.0
     hours_per_week: int = 0
+    target_hours: float | None = 0.0
 
     class Config:
         from_attributes = True

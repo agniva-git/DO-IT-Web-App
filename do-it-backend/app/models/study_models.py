@@ -21,6 +21,7 @@ class StudyGoal(Base):
     target_date: Mapped[date] = mapped_column(Date, nullable=False)
     hours_per_day: Mapped[float] = mapped_column(Float, default=0.0, nullable=True)
     hours_per_week: Mapped[int] = mapped_column(Integer, default=0)
+    target_hours: Mapped[float] = mapped_column(Float, default=0.0, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 

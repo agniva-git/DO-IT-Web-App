@@ -14,6 +14,8 @@ export const listSessions = () => api.get('/study/sessions').then((res) => res.d
 export const createSession = (session) =>
   api.post('/study/sessions', session).then((res) => res.data)
 
+export const deleteSession = (id) => api.delete(`/study/sessions/${id}`)
+
 // ISO date of the most recent Monday, used to compute "this week" totals.
 export function startOfThisWeek() {
   const now = new Date()

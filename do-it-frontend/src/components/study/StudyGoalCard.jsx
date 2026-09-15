@@ -23,7 +23,13 @@ function getDeadlineInfo(targetDateStr) {
   }
 }
 
-export default function StudyGoalCard({ goal, minutesToday = 0, onEdit, onDelete }) {
+export default function StudyGoalCard({
+  goal,
+  minutesToday = 0,
+  totalMinutes = 0,
+  onEdit,
+  onDelete
+}) {
   const dailyTargetHours =
     goal.hours_per_day !== undefined && goal.hours_per_day !== null && goal.hours_per_day > 0
       ? goal.hours_per_day
@@ -31,9 +37,20 @@ export default function StudyGoalCard({ goal, minutesToday = 0, onEdit, onDelete
         ? Math.round((goal.hours_per_week / 7) * 10) / 10
         : 0
 
-  const dailyTargetMinutes = dailyTargetHours * 60
-  const hoursDoneToday = (minutesToday / 60).toFixed(1)
   const deadline = getDeadlineInfo(goal.target_date)
+  const totalHoursDone = totalMinutes / 60
+  const hoursDoneToday = (minutesToday / 60).toFixed(1)
+
+  // Determine overall target hours:
+  // 1. Explicit goal.target_hours if set by user.
+  // 2. Or completed hours + remaining days * daily target hours.
+  const daysRemaining = deadline && !deadline.isPast && deadline.days > 0 ? deadline.days : 0
+  const totalTargetHours =
+    goal.target_hours && goal.target_hours > 0
+      ? goal.target_hours
+      : Math.max(1, Math.round(totalHoursDone + daysRemaining * dailyTargetHours))
+
+  const totalTargetMinutes = totalTargetHours * 60
 
   return (
     <Card>
@@ -74,16 +91,14 @@ export default function StudyGoalCard({ goal, minutesToday = 0, onEdit, onDelete
           </button>
         </div>
       </div>
-      <ProgressBar value={minutesToday} max={dailyTargetMinutes || 1} colorClass="bg-plan" />
+      <ProgressBar value={totalMinutes} max={totalTargetMinutes || 1} colorClass="bg-plan" />
       <div className="flex items-center justify-between text-xs text-paper/50 mt-1.5 flex-wrap gap-1">
         <span>
+          <strong className="text-paper/80 font-medium">{totalHoursDone.toFixed(1)}h</strong> / {totalTargetHours}h total
+        </span>
+        <span className="text-paper/40">
           {hoursDoneToday}h / {dailyTargetHours}h today
         </span>
-        {deadline && !deadline.isPast && deadline.days > 0 && dailyTargetHours > 0 && (
-          <span className="text-paper/40">
-            {(deadline.days * dailyTargetHours).toFixed(0)}h total till deadline
-          </span>
-        )}
       </div>
     </Card>
   )

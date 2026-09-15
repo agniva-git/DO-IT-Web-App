@@ -34,6 +34,14 @@ export default function Study() {
       .finally(() => setLoading(false))
   }, [])
 
+  const totalMinutesBySubject = useMemo(() => {
+    const totals = {}
+    for (const s of sessions) {
+      totals[s.subject] = (totals[s.subject] || 0) + s.duration
+    }
+    return totals
+  }, [sessions])
+
   const minutesTodayBySubject = useMemo(() => {
     const todayStr = localDateISO()
     const totals = {}
@@ -57,15 +65,19 @@ export default function Study() {
   }, [sessions])
 
   const handleSaveGoal = async (formData) => {
-    if (editingGoal) {
-      const updated = await updateGoal(editingGoal.id, formData)
-      setGoals((gs) => gs.map((g) => (g.id === editingGoal.id ? updated : g)))
-    } else {
-      const created = await createGoal(formData)
-      setGoals((gs) => [...gs, created])
+    try {
+      if (editingGoal) {
+        const updated = await updateGoal(editingGoal.id, formData)
+        setGoals((gs) => gs.map((g) => (g.id === editingGoal.id ? updated : g)))
+      } else {
+        const created = await createGoal(formData)
+        setGoals((gs) => [...gs, created])
+      }
+      setGoalFormOpen(false)
+      setEditingGoal(null)
+    } catch {
+      setError('Could not save goal. Please check your inputs.')
     }
-    setGoalFormOpen(false)
-    setEditingGoal(null)
   }
 
   const handleEditGoal = (goal) => {
@@ -74,14 +86,26 @@ export default function Study() {
   }
 
   const handleDeleteGoal = async (id) => {
-    await deleteGoal(id)
-    setGoals((gs) => gs.filter((g) => g.id !== id))
+    try {
+      await deleteGoal(id)
+      setGoals((gs) => gs.filter((g) => g.id !== id))
+    } catch {
+      setError('Could not delete goal.')
+    }
   }
 
   const handleLogSession = async (session) => {
     const created = await createSession(session)
     setSessions((ss) => [...ss, created])
-    setSessionFormOpen(false)
+  }
+
+  const handleDeleteSession = async (id) => {
+    try {
+      await deleteSession(id)
+      setSessions((ss) => ss.filter((s) => s.id !== id))
+    } catch {
+      setError('Could not delete session. Please try again.')
+    }
   }
 
   if (loading) {
@@ -125,6 +149,7 @@ export default function Study() {
               goal={goal}
               minutesToday={minutesTodayBySubject[goal.subject] || 0}
               minutesThisWeek={minutesThisWeekBySubject[goal.subject] || 0}
+              totalMinutes={totalMinutesBySubject[goal.subject] || 0}
               onEdit={handleEditGoal}
               onDelete={handleDeleteGoal}
             />
@@ -132,7 +157,7 @@ export default function Study() {
         </div>
       )}
 
-      <SessionHistoryList sessions={sessions} />
+      <SessionHistoryList sessions={sessions} onDelete={handleDeleteSession} />
 
       <StudyGoalForm
         open={goalFormOpen}

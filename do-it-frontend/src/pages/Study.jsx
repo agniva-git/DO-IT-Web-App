@@ -11,6 +11,7 @@ import {
   deleteGoal,
   listSessions,
   createSession,
+  deleteSession,
   startOfThisWeek
 } from '../api/study.js'
 import { localDateISO } from '../utils/date.js'

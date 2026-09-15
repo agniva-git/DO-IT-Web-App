@@ -10,4 +10,4 @@ export const NAV_ITEMS = [
   { to: '/settings', label: 'Settings', icon: 'settings' }
 ]
 
-export const MOBILE_QUICK_TABS = ['/dashboard', '/tasks', '/study', '/focus']
+export const MOBILE_QUICK_TABS = ['/tasks', '/study', '/budget', '/habits']

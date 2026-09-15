@@ -19,6 +19,18 @@ const TAB_ICONS = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
     </svg>
   ),
+  '/budget': (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <rect x="2" y="5" width="20" height="14" rx="2" strokeLinecap="round" strokeLinejoin="round"/>
+      <line x1="2" y1="10" x2="22" y2="10" strokeLinecap="round" strokeLinejoin="round"/>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 15h2m4 0h4"/>
+    </svg>
+  ),
+  '/habits': (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+  ),
   '/focus': (
     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
       <circle cx="12" cy="12" r="9"/>
@@ -27,13 +39,13 @@ const TAB_ICONS = {
   )
 }
 
-const quickTabs = NAV_ITEMS.filter((item) => MOBILE_QUICK_TABS.includes(item.to))
+const quickTabs = MOBILE_QUICK_TABS.map((to) => NAV_ITEMS.find((item) => item.to === to)).filter(Boolean)
 
 export default function MobileTabBar() {
   const [moreOpen, setMoreOpen] = useState(false)
   const location = useLocation()
 
-  const isOnMoreOnlyPage = !MOBILE_QUICK_TABS.includes(location.pathname)
+  const isOnMoreOnlyPage = !MOBILE_QUICK_TABS.includes(location.pathname) && location.pathname !== '/dashboard'
 
   return (
     <>

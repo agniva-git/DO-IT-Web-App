@@ -43,7 +43,9 @@ export default defineConfig({
         // Cache the app shell; API calls are network-first (handled per-request
         // later) rather than cached blindly, since task/study data must stay fresh.
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
-        navigateFallback: '/index.html'
+        navigateFallback: '/index.html',
+        skipWaiting: true,
+        clientsClaim: true
       },
       devOptions: {
         enabled: true

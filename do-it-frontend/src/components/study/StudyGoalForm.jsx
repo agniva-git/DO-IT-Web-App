@@ -3,7 +3,7 @@ import Modal from '../ui/Modal.jsx'
 import Input from '../ui/Input.jsx'
 import Button from '../ui/Button.jsx'
 
-const emptyGoal = { subject: '', target_date: '', hours_per_day: '', target_hours: '' }
+const emptyGoal = { subject: '', target_date: '', hours_per_day: '' }
 
 function calcDaysLeft(dateStr) {
   if (!dateStr) return 0
@@ -29,70 +29,27 @@ export default function StudyGoalForm({ open, onClose, onSave, editingGoal }) {
           : editingGoal.hours_per_week
             ? Math.round((editingGoal.hours_per_week / 7) * 10) / 10
             : ''
-      const totalHours =
-        editingGoal.target_hours && editingGoal.target_hours > 0
-          ? editingGoal.target_hours
-          : dailyHours
-            ? Math.round(dailyHours * calcDaysLeft(editingGoal.target_date))
-            : ''
       setForm({
         subject: editingGoal.subject,
         target_date: editingGoal.target_date,
-        hours_per_day: dailyHours,
-        target_hours: totalHours
+        hours_per_day: dailyHours
       })
     } else {
       setForm(emptyGoal)
     }
   }, [editingGoal, open])
 
-  const handleDateChange = (newDate) => {
-    const days = calcDaysLeft(newDate)
-    const currentDaily = Number(form.hours_per_day)
-    const currentTotal = Number(form.target_hours)
-
-    if (currentTotal > 0 && days > 0) {
-      setForm((f) => ({
-        ...f,
-        target_date: newDate,
-        hours_per_day: (currentTotal / days).toFixed(1)
-      }))
-    } else if (currentDaily > 0 && days > 0) {
-      setForm((f) => ({
-        ...f,
-        target_date: newDate,
-        target_hours: Math.round(currentDaily * days)
-      }))
-    } else {
-      setForm((f) => ({ ...f, target_date: newDate }))
-    }
-  }
-
-  const handleTotalHoursChange = (val) => {
-    const total = Number(val)
-    const days = calcDaysLeft(form.target_date)
-    setForm((f) => ({
-      ...f,
-      target_hours: val,
-      hours_per_day: total > 0 && days > 0 ? (total / days).toFixed(1) : f.hours_per_day
-    }))
-  }
-
-  const handleDailyHoursChange = (val) => {
-    const daily = Number(val)
-    const days = calcDaysLeft(form.target_date)
-    setForm((f) => ({
-      ...f,
-      hours_per_day: val,
-      target_hours: daily > 0 && days > 0 ? Math.round(daily * days) : f.target_hours
-    }))
-  }
+  const daysLeft = calcDaysLeft(form.target_date)
+  const estimatedTotalHours =
+    daysLeft > 0 && Number(form.hours_per_day) > 0
+      ? Math.round(daysLeft * Number(form.hours_per_day))
+      : 0
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.subject.trim() || !form.target_date || submitting) return
     const daily = Number(form.hours_per_day) || 0
-    const total = Number(form.target_hours) || 0
+    const total = estimatedTotalHours
     setSubmitting(true)
     try {
       await onSave({
@@ -118,24 +75,14 @@ export default function StudyGoalForm({ open, onClose, onSave, editingGoal }) {
           onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
           required
         />
-        <Input
-          id="target_date"
-          type="date"
-          label="Target date"
-          value={form.target_date}
-          onChange={(e) => handleDateChange(e.target.value)}
-          required
-        />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
-            id="target_hours"
-            type="number"
-            min="0"
-            step="1"
-            label="Total target hours"
-            placeholder="e.g. 100"
-            value={form.target_hours}
-            onChange={(e) => handleTotalHoursChange(e.target.value)}
+            id="target_date"
+            type="date"
+            label="Target date"
+            value={form.target_date}
+            onChange={(e) => setForm((f) => ({ ...f, target_date: e.target.value }))}
+            required
           />
           <Input
             id="hours_per_day"
@@ -145,9 +92,15 @@ export default function StudyGoalForm({ open, onClose, onSave, editingGoal }) {
             label="Hours / day"
             placeholder="e.g. 2"
             value={form.hours_per_day}
-            onChange={(e) => handleDailyHoursChange(e.target.value)}
+            onChange={(e) => setForm((f) => ({ ...f, hours_per_day: e.target.value }))}
+            required
           />
         </div>
+        {estimatedTotalHours > 0 && (
+          <p className="text-xs text-paper/50 -mt-1">
+            ≈ <strong className="text-paper/80 font-medium">{estimatedTotalHours} total hours</strong> planned across {daysLeft} days until deadline.
+          </p>
+        )}
         <Button type="submit" loading={submitting} className="mt-2">
           {submitting ? 'Saving…' : editingGoal ? 'Save changes' : 'Add goal'}
         </Button>

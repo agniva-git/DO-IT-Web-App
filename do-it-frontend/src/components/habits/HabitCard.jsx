@@ -1,6 +1,6 @@
 import Card from '../ui/Card.jsx'
 import HabitHistoryGrid from './HabitHistoryGrid.jsx'
-import { calcStreak, calcConsistency, lastNDays, todayISO } from '../../api/habits.js'
+import { calcStreak, calcDaysCompleted, lastNDays, todayISO } from '../../api/habits.js'
 
 const COPY = {
   build: {
@@ -20,7 +20,7 @@ const COPY = {
 export default function HabitCard({ habit, logs, onToggleToday, onDelete }) {
   const copy = COPY[habit.type] || COPY.build
   const streak = calcStreak(logs, habit.id)
-  const consistency = calcConsistency(logs, habit.id)
+  const daysCompleted = calcDaysCompleted(logs, habit.id, 30)
   const days = lastNDays(logs, habit.id)
   const today = todayISO()
   const doneToday = logs.some((l) => l.habit_id === habit.id && l.date === today && l.completed)
@@ -40,7 +40,7 @@ export default function HabitCard({ habit, logs, onToggleToday, onDelete }) {
 
       <div className="flex items-center gap-4 mb-4 text-sm">
         <span className="text-warn">🔥 {streak} {copy.streakUnit}</span>
-        <span className="text-paper/50">{consistency}% / 30 days</span>
+        <span className="text-paper/50">{daysCompleted} / 30 days</span>
       </div>
 
       <button

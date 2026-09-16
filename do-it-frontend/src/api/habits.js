@@ -42,16 +42,23 @@ export function calcStreak(logs, habitId) {
   return streak
 }
 
-// Consistency over the last N logged days (default 30).
-export function calcConsistency(logs, habitId, days = 30) {
+// Number of completed days in the last N calendar days (default 30).
+export function calcDaysCompleted(logs, habitId, days = 30) {
   const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - days)
+  cutoff.setDate(cutoff.getDate() - (days - 1))
+  cutoff.setHours(0, 0, 0, 0)
+  const cutoffStr = localDateISO(cutoff)
   const relevant = logs.filter(
-    (l) => l.habit_id === habitId && new Date(l.date) >= cutoff
+    (l) => l.habit_id === habitId && l.date >= cutoffStr && l.completed === true
   )
-  if (relevant.length === 0) return 0
-  const completed = relevant.filter((l) => l.completed).length
-  return Math.round((completed / relevant.length) * 100)
+  const uniqueDates = new Set(relevant.map((l) => l.date))
+  return uniqueDates.size
+}
+
+// Consistency over the last N calendar days (default 30).
+export function calcConsistency(logs, habitId, days = 30) {
+  const completed = calcDaysCompleted(logs, habitId, days)
+  return Math.round((completed / days) * 100)
 }
 
 // Last N days as [{date, completed}] for the mini history grid, oldest first.

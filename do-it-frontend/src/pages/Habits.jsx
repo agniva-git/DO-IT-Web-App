@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import Button from '../components/ui/Button.jsx'
 import OptionGroup from '../components/ui/OptionGroup.jsx'
 import HabitCard from '../components/habits/HabitCard.jsx'
+import HabitMonthlyHistory from '../components/habits/HabitMonthlyHistory.jsx'
 import AddHabitForm from '../components/habits/AddHabitForm.jsx'
 import {
   listHabits,
@@ -139,6 +140,8 @@ export default function Habits() {
           ))}
         </div>
       )}
+
+      <HabitMonthlyHistory habits={habits} logs={logs} activeTab={activeTab} />
 
       <AddHabitForm
         open={formOpen}

@@ -33,12 +33,10 @@ export default function ForgotPassword() {
 
         <Card>
           {message ? (
-            <div className="flex flex-col gap-4">
-              <p className="text-sm text-paper/70">{message}</p>
-              <p className="text-xs text-paper/40">
-                This project doesn't send real emails yet — the reset link is
-                printed in the backend server's terminal. Copy it from there
-                and open it in your browser.
+            <div className="flex flex-col gap-3">
+              <p className="text-sm text-paper/80">{message}</p>
+              <p className="text-xs text-paper/50">
+                Please check your inbox (and spam/junk folder). The link will expire in 30 minutes.
               </p>
             </div>
           ) : (

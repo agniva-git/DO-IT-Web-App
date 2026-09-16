@@ -21,6 +21,7 @@ from app.schemas.user_schemas import (
     UserUpdate,
 )
 from app.utils.deps import get_current_user
+from app.utils.email import send_password_reset_email
 from app.utils.security import (
     create_access_token,
     generate_reset_token,
@@ -148,18 +149,21 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
         )
         db.commit()
 
-        reset_link = f"{settings.frontend_origin}/reset-password?token={raw_token}"
-        # DEV-ONLY STAND-IN: prints the reset link instead of emailing it.
-        # Replace with a real email send in Phase H (Notifications).
-        print("\n" + "=" * 60)
-        print(f"PASSWORD RESET LINK for {user.email}:")
-        print(reset_link)
-        print(f"(valid for {RESET_TOKEN_VALID_MINUTES} minutes)")
-        print("=" * 60 + "\n")
+        prod_origin = next((o for o in settings.allowed_origins if o.startswith("https://")), None)
+        base_origin = prod_origin or settings.allowed_origins[0]
+        reset_link = f"{base_origin}/reset-password?token={raw_token}"
+
+        email_sent = send_password_reset_email(user.email, reset_link)
+        if not email_sent:
+            # Fallback for dev / when SMTP is not yet configured
+            print("\n" + "=" * 60)
+            print(f"PASSWORD RESET LINK for {user.email}:")
+            print(reset_link)
+            print(f"(valid for {RESET_TOKEN_VALID_MINUTES} minutes)")
+            print("=" * 60 + "\n")
 
     return {
-        "detail": "If that email is registered, a reset link has been generated. "
-        "(Dev mode: check the backend server console for the link.)"
+        "detail": "If that email is registered, a reset link has been sent to your inbox."
     }
 
 

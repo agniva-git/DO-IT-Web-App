@@ -8,8 +8,8 @@ import AccountSection from '../components/settings/AccountSection.jsx'
 import { getProfile, updateProfile, getPreferences, updatePreferences } from '../api/settings.js'
 import {
   storedPreference,
-  savePreference,
-  requestPermission,
+  subscribeToPush,
+  unsubscribeFromPush,
   permissionStatus
 } from '../utils/notifications.js'
 
@@ -18,10 +18,8 @@ export default function Settings() {
   const { logout } = useAuth()
   const [profile, setProfile] = useState(null)
   const [preferences, setPreferences] = useState(null)
-  // Read initial value from localStorage so the setting persists across refreshes.
   const [notifications, setNotifications] = useState({
-    browser: storedPreference(),
-    email: false
+    browser: storedPreference()
   })
   const [notifPermission, setNotifPermission] = useState(permissionStatus())
   const [loading, setLoading] = useState(true)
@@ -63,18 +61,17 @@ export default function Settings() {
   const handleNotificationsChange = async (next) => {
     const browserTurnedOn = next.browser && !notifications.browser
     if (browserTurnedOn) {
-      const status = await requestPermission()
-      setNotifPermission(status)
-      if (status !== 'granted') {
-        // Don't flip the toggle if permission was denied.
+      const res = await subscribeToPush()
+      setNotifPermission(permissionStatus())
+      if (!res.success && res.permission === 'denied') {
         return
       }
-    }
-    if (!next.browser) {
-      savePreference(false)
+      setNotifications({ browser: true })
+    } else {
+      await unsubscribeFromPush()
       setNotifPermission(permissionStatus())
+      setNotifications({ browser: false })
     }
-    setNotifications(next)
   }
 
   if (loading) {

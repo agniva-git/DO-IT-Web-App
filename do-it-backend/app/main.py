@@ -8,6 +8,7 @@ from app.api.focus import router as focus_router
 from app.api.fitness import router as fitness_router
 from app.api.habits import router as habits_router
 from app.api.budget import router as budget_router
+from app.api.notifications import router as notifications_router
 from app.core.config import settings
 
 app = FastAPI(title="DO-IT API", version="0.1.0")
@@ -30,6 +31,7 @@ app.include_router(focus_router)
 app.include_router(fitness_router)
 app.include_router(habits_router)
 app.include_router(budget_router)
+app.include_router(notifications_router)
 
 
 @app.get("/")

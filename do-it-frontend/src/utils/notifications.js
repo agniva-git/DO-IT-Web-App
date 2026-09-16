@@ -1,21 +1,42 @@
 /**
- * Browser notification helpers.
- *
- * Usage:
- *   import { requestPermission, sendNotification, isGranted } from '../utils/notifications.js'
- *
- *   // In settings toggle handler:
- *   const granted = await requestPermission()
- *
- *   // In focus timer:
- *   sendNotification('Session complete!', 'Great work — take a break.')
+ * Browser notification & Web Push helpers for DO-IT.
  */
+import api from '../api/client.js'
 
 const STORAGE_KEY = 'do_it_notifications_browser'
 
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const rawData = window.atob(base64)
+  const outputArray = new Uint8Array(rawData.length)
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i)
+  }
+  return outputArray
+}
+
+function playGentleChime() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+    const osc = audioCtx.createOscillator()
+    const gain = audioCtx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime) // D5
+    osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15) // A5
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime)
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6)
+    osc.connect(gain)
+    gain.connect(audioCtx.destination)
+    osc.start()
+    osc.stop(audioCtx.currentTime + 0.6)
+  } catch {
+    // AudioContext not allowed or not supported; ignore safely
+  }
+}
+
 /**
- * Returns true if browser notifications are both supported and permission
- * has been granted.
+ * Returns true if browser notifications are supported, permitted, and enabled.
  */
 export function isGranted() {
   return (
@@ -25,25 +46,15 @@ export function isGranted() {
   )
 }
 
-/**
- * Returns the current browser permission status: 'granted' | 'denied' | 'default' | 'unsupported'
- */
 export function permissionStatus() {
   if (!('Notification' in window)) return 'unsupported'
   return Notification.permission
 }
 
-/**
- * Reads the user's stored preference (independent of actual permission —
- * user might have enabled in app but not yet granted in browser).
- */
 export function storedPreference() {
   return localStorage.getItem(STORAGE_KEY) === 'true'
 }
 
-/**
- * Saves the user's preference to localStorage.
- */
 export function savePreference(enabled) {
   if (enabled) {
     localStorage.setItem(STORAGE_KEY, 'true')
@@ -53,8 +64,7 @@ export function savePreference(enabled) {
 }
 
 /**
- * Requests browser notification permission and saves the result.
- * Returns 'granted' | 'denied' | 'default' | 'unsupported'.
+ * Requests browser notification permission.
  */
 export async function requestPermission() {
   if (!('Notification' in window)) return 'unsupported'
@@ -63,7 +73,6 @@ export async function requestPermission() {
     return 'granted'
   }
   if (Notification.permission === 'denied') {
-    // Can't re-prompt — user must manually reset in browser settings.
     return 'denied'
   }
   const result = await Notification.requestPermission()
@@ -72,16 +81,114 @@ export async function requestPermission() {
 }
 
 /**
- * Fires a browser notification if permission is granted and user has
- * enabled the setting.  Silently no-ops otherwise — callers don't need
- * to guard.
+ * Subscribes the current browser to Web Push using the backend's VAPID key.
  */
-export function sendNotification(title, body, options = {}) {
-  if (!isGranted()) return
+export async function subscribeToPush() {
+  const perm = await requestPermission()
+  if (perm !== 'granted') return { success: false, permission: perm }
+
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    savePreference(true)
+    return { success: true, pushSupported: false }
+  }
+
   try {
-    new Notification(title, { body, icon: '/icons/icon-192.png', ...options })
-  } catch {
-    // Service worker notifications (required on some mobile browsers)
-    // would go here in a future iteration.
+    const reg = await navigator.serviceWorker.ready
+    let subscription = await reg.pushManager.getSubscription()
+
+    if (!subscription) {
+      const res = await api.get('/notifications/vapid-public-key')
+      const vapidPublicKey = res.data.public_key
+      if (!vapidPublicKey) {
+        throw new Error('No VAPID public key available')
+      }
+
+      subscription = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+      })
+    }
+
+    const subJson = subscription.toJSON()
+    await api.post('/notifications/subscribe', {
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: subJson.keys?.p256dh || '',
+        auth: subJson.keys?.auth || ''
+      }
+    })
+
+    savePreference(true)
+    return { success: true, pushSupported: true }
+  } catch (err) {
+    console.error('Failed to subscribe to web push:', err)
+    savePreference(true) // Still allow local in-browser notifications
+    return { success: true, pushSupported: false, error: err.message }
   }
 }
+
+/**
+ * Unsubscribes from Web Push.
+ */
+export async function unsubscribeFromPush() {
+  savePreference(false)
+
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return { success: true }
+  }
+
+  try {
+    const reg = await navigator.serviceWorker.ready
+    const subscription = await reg.pushManager.getSubscription()
+    if (subscription) {
+      await subscription.unsubscribe()
+      await api.post('/notifications/unsubscribe', {
+        endpoint: subscription.endpoint
+      })
+    }
+    return { success: true }
+  } catch (err) {
+    console.error('Failed to unsubscribe from push:', err)
+    return { success: false, error: err.message }
+  }
+}
+
+/**
+ * Local notification helper (e.g. for timer alerts).
+ * Works via Service Worker registration on mobile & desktop with chime sound.
+ */
+export async function sendLocalNotification(title, body, options = {}) {
+  if (!isGranted()) return
+
+  playGentleChime()
+
+  const defaultOptions = {
+    body,
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    vibrate: [200, 100, 200],
+    ...options
+  }
+
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.ready
+      if (reg && reg.showNotification) {
+        await reg.showNotification(title, defaultOptions)
+        return
+      }
+    } catch {
+      // fallback below
+    }
+  }
+
+  try {
+    new Notification(title, defaultOptions)
+  } catch {
+    // ignore
+  }
+}
+
+// Backward-compatible alias
+export const sendNotification = sendLocalNotification
+

@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     brevo_api_key: str | None = None
     sender_email: str | None = None
 
+    vapid_public_key: str = "BAoCy40no6SBVL4aoTh9LQ47_sPM5KwxA8oR3NoLCdKthQgx6j-fC11qGi1PlXPLJRE0JVr3nj0LUPgqeWajRJo"
+    vapid_private_key: str = "QqempFUH15Z0Lso8iSrezn15AobbiUvDgn-ET54rZHs"
+    vapid_claim_email: str = "mailto:support@do-it.app"
+
     @property
     def allowed_origins(self) -> list[str]:
         return [origin.strip() for origin in self.frontend_origin.split(",") if origin.strip()]

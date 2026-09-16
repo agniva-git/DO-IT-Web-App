@@ -15,6 +15,7 @@ from app.models import focus_models  # noqa: F401 — registers FocusSession
 from app.models import fitness_models  # noqa: F401 — registers Workout
 from app.models import habit_models  # noqa: F401 — registers Habit, HabitLog
 from app.models import budget_models  # noqa: F401 — registers BudgetMonth, BudgetCategory, Expense
+from app.models import notification_models  # noqa: F401 — registers NotificationSubscription
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)

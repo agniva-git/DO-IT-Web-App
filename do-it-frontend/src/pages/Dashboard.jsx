@@ -13,6 +13,8 @@ import QuickActions from '../components/dashboard/QuickActions.jsx'
 import QuickExpenseModal from '../components/dashboard/QuickExpenseModal.jsx'
 import AddTaskForm from '../components/tasks/AddTaskForm.jsx'
 import Card from '../components/ui/Card.jsx'
+import api from '../api/client.js'
+import { storedPreference } from '../utils/notifications.js'
 import { listTasks, toggleTaskComplete, createTask } from '../api/tasks.js'
 import { listFocusSessions } from '../api/focus.js'
 import { listWorkouts, getPreferences } from '../api/fitness.js'
@@ -94,6 +96,10 @@ export default function Dashboard() {
         )
         setBudgetCategories(sorted)
         setTodaysExpenses(flat.filter((e) => e.date === localDateISO()))
+      }
+
+      if (storedPreference()) {
+        api.post('/notifications/check-reminders').catch(() => {})
       }
     }
 

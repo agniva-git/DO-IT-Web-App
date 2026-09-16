@@ -1,5 +1,8 @@
+import json
 import logging
 import smtplib
+import urllib.error
+import urllib.request
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -8,21 +11,54 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
-def send_password_reset_email(to_email: str, reset_link: str) -> bool:
-    """Sends a password reset email via SMTP.
-    Returns True if sent successfully, False otherwise.
-    """
-    if not settings.smtp_user or not settings.smtp_password:
-        logger.warning("SMTP credentials (smtp_user / smtp_password) not set. Skipping email dispatch.")
+def _send_via_brevo_api(to_email: str, subject: str, html_body: str, text_body: str) -> bool:
+    """Sends email via Brevo (Sendinblue) HTTPS REST API (Port 443)."""
+    sender_email = settings.sender_email or settings.smtp_from_email or settings.smtp_user
+    if not sender_email:
+        logger.error("Brevo API key set but SENDER_EMAIL is missing. Cannot send.")
         return False
 
-    sender_email = settings.smtp_from_email or settings.smtp_user
-    sender_header = f"{settings.smtp_from_name} <{sender_email}>"
+    sender_name = settings.smtp_from_name or "DO-IT"
+    payload = {
+        "sender": {"name": sender_name, "email": sender_email.strip()},
+        "to": [{"email": to_email.strip()}],
+        "subject": subject,
+        "htmlContent": html_body,
+        "textContent": text_body,
+    }
 
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "Reset your DO-IT password"
-    msg["From"] = sender_header
-    msg["To"] = to_email
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "accept": "application/json",
+            "api-key": settings.brevo_api_key.strip(),
+            "content-type": "application/json",
+            "User-Agent": "DO-IT-Backend/1.0",
+        },
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(req, timeout=12) as response:
+            status_code = response.getcode()
+            if status_code in (200, 201, 202):
+                logger.info(f"Password reset email sent to {to_email} via Brevo HTTPS API")
+                return True
+            logger.warning(f"Brevo API returned unexpected status {status_code}")
+            return False
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace")
+        logger.error(f"Brevo API HTTP error {e.code}: {err_body}")
+        return False
+    except Exception as e:
+        logger.error(f"Failed to send email via Brevo API: {e}", exc_info=True)
+        return False
+
+
+def send_password_reset_email(to_email: str, reset_link: str) -> bool:
+    """Sends a password reset email via Brevo HTTPS API or SMTP fallback."""
+    subject = "Reset your DO-IT password"
 
     text_body = f"""Hello,
 
@@ -129,19 +165,35 @@ The DO-IT Team
 </html>
 """
 
-    msg.attach(MIMEText(text_body, "plain"))
-    msg.attach(MIMEText(html_body, "html"))
+    # 1. Primary: Brevo HTTPS REST API (Port 443 - works on Render Free tier without firewall issues)
+    if settings.brevo_api_key:
+        return _send_via_brevo_api(to_email, subject, html_body, text_body)
 
-    try:
-        clean_password = settings.smtp_password.replace(" ", "")
-        with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=12) as server:
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(settings.smtp_user, clean_password)
-            server.sendmail(sender_email, [to_email], msg.as_string())
-        logger.info(f"Password reset email sent to {to_email}")
-        return True
-    except Exception as e:
-        logger.error(f"Failed to send password reset email via SMTP: {e}", exc_info=True)
-        return False
+    # 2. Secondary: SMTP fallback
+    if settings.smtp_user and settings.smtp_password:
+        sender_email = settings.smtp_from_email or settings.smtp_user
+        sender_header = f"{settings.smtp_from_name} <{sender_email}>"
+
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = sender_header
+        msg["To"] = to_email
+        msg.attach(MIMEText(text_body, "plain"))
+        msg.attach(MIMEText(html_body, "html"))
+
+        try:
+            clean_password = settings.smtp_password.replace(" ", "")
+            with smtplib.SMTP(settings.smtp_host, settings.smtp_port, timeout=12) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(settings.smtp_user, clean_password)
+                server.sendmail(sender_email, [to_email], msg.as_string())
+            logger.info(f"Password reset email sent to {to_email} via SMTP")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send password reset email via SMTP: {e}", exc_info=True)
+            return False
+
+    logger.warning("Neither Brevo API key nor SMTP credentials are set. Cannot send email.")
+    return False

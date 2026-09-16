@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     smtp_from_name: str = "DO-IT"
     smtp_from_email: str | None = None
 
+    brevo_api_key: str | None = None
+    sender_email: str | None = None
+
     @property
     def allowed_origins(self) -> list[str]:
         return [origin.strip() for origin in self.frontend_origin.split(",") if origin.strip()]

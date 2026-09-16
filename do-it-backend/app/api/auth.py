@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -134,7 +134,11 @@ def read_current_user(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/forgot-password")
-def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(
+    payload: ForgotPasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+):
     user = db.query(User).filter(User.email == payload.email).first()
 
     # Always return the same generic response whether or not the email
@@ -149,8 +153,27 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
         )
         db.commit()
 
-        prod_origin = next((o for o in settings.allowed_origins if o.startswith("https://")), None)
-        base_origin = prod_origin or settings.allowed_origins[0]
+        # Determine the user's frontend URL:
+        # 1. Prefer the Origin or Referer header sent by the client browser
+        req_origin = request.headers.get("origin")
+        if not req_origin and request.headers.get("referer"):
+            # Extract scheme + netloc from referer
+            from urllib.parse import urlparse
+            ref = urlparse(request.headers.get("referer"))
+            if ref.scheme and ref.netloc:
+                req_origin = f"{ref.scheme}://{ref.netloc}"
+
+        if req_origin and req_origin.startswith("http") and "localhost" not in req_origin:
+            base_origin = req_origin
+        else:
+            # 2. Check allowed_origins for a production (non-localhost) https address
+            prod_origin = next(
+                (o for o in settings.allowed_origins if o.startswith("https://") and "localhost" not in o and "127.0.0.1" not in o),
+                None
+            )
+            base_origin = prod_origin or req_origin or "https://do-it-web.vercel.app"
+
+        base_origin = base_origin.rstrip("/")
         reset_link = f"{base_origin}/reset-password?token={raw_token}"
 
         email_sent = send_password_reset_email(user.email, reset_link)

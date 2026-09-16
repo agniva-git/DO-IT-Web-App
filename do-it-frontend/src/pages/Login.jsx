@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import Input from '../components/ui/Input.jsx'
 import PasswordInput from '../components/ui/PasswordInput.jsx'
@@ -8,6 +8,8 @@ import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const successMessage = location.state?.message
   const { login } = useAuth()
   const [form, setForm] = useState({ identifier: '', password: '' })
   const [error, setError] = useState('')
@@ -43,6 +45,11 @@ export default function Login() {
         </div>
 
         <Card>
+          {successMessage && (
+            <div className="mb-4 p-3 rounded-card bg-plan/15 border border-plan/40 text-plan text-xs font-medium text-center">
+              {successMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
               id="identifier"

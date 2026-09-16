@@ -31,7 +31,9 @@ export default function ResetPassword() {
     setLoading(true)
     try {
       await api.post('/auth/reset-password', { token, new_password: newPassword })
-      navigate('/login')
+      navigate('/login', {
+        state: { message: 'Password updated successfully! Please log in with your new password.' }
+      })
     } catch (err) {
       setError(
         err.response?.data?.detail || 'That reset link is invalid or has expired.'

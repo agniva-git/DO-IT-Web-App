@@ -50,6 +50,7 @@ jobs:
           mkdir -p do-it-android/app/src/main/assets/public
           rm -rf do-it-android/app/src/main/assets/public/*
           cp -r do-it-frontend/dist/* do-it-android/app/src/main/assets/public/
+          cp do-it-frontend/capacitor.config.json do-it-android/app/src/main/assets/capacitor.config.json
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3

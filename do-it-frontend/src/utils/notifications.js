@@ -1,9 +1,17 @@
 /**
- * Browser notification & Web Push helpers for DO-IT.
+ * Unified notification helper for DO-IT.
+ * Supports:
+ * - Native Android Offline Local Notifications (@capacitor/local-notifications)
+ * - Browser Web Push (VAPID / Service Worker)
+ * - In-app gentle chime audio alert
  */
+import { Capacitor } from '@capacitor/core'
+import { LocalNotifications } from '@capacitor/local-notifications'
 import api from '../api/client.js'
 
 const STORAGE_KEY = 'do_it_notifications_browser'
+
+export const isNative = Capacitor.isNativePlatform()
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
@@ -16,7 +24,7 @@ function urlBase64ToUint8Array(base64String) {
   return outputArray
 }
 
-function playGentleChime() {
+export function playGentleChime() {
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     const osc = audioCtx.createOscillator()
@@ -36,17 +44,23 @@ function playGentleChime() {
 }
 
 /**
- * Returns true if browser notifications are supported, permitted, and enabled.
+ * Returns true if notifications are permitted and enabled.
  */
 export function isGranted() {
+  if (isNative) {
+    return storedPreference()
+  }
   return (
     'Notification' in window &&
     Notification.permission === 'granted' &&
-    localStorage.getItem(STORAGE_KEY) === 'true'
+    storedPreference()
   )
 }
 
 export function permissionStatus() {
+  if (isNative) {
+    return storedPreference() ? 'granted' : 'default'
+  }
   if (!('Notification' in window)) return 'unsupported'
   return Notification.permission
 }
@@ -64,9 +78,22 @@ export function savePreference(enabled) {
 }
 
 /**
- * Requests browser notification permission.
+ * Requests notification permission across native Android or Web browser.
  */
 export async function requestPermission() {
+  if (isNative) {
+    try {
+      const perm = await LocalNotifications.requestPermissions()
+      const granted = perm.display === 'granted'
+      savePreference(granted)
+      return granted ? 'granted' : 'denied'
+    } catch (err) {
+      console.warn('Native permission request failed:', err)
+      savePreference(true)
+      return 'granted'
+    }
+  }
+
   if (!('Notification' in window)) return 'unsupported'
   if (Notification.permission === 'granted') {
     savePreference(true)
@@ -81,11 +108,18 @@ export async function requestPermission() {
 }
 
 /**
- * Subscribes the current browser to Web Push using the backend's VAPID key.
+ * Subscribes the current device to notifications.
+ * On Android native: ensures LocalNotification permissions are granted.
+ * On Web: registers Web Push via VAPID service worker.
  */
 export async function subscribeToPush() {
   const perm = await requestPermission()
   if (perm !== 'granted') return { success: false, permission: perm }
+
+  if (isNative) {
+    savePreference(true)
+    return { success: true, pushSupported: false, native: true }
+  }
 
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     savePreference(true)
@@ -122,16 +156,20 @@ export async function subscribeToPush() {
     return { success: true, pushSupported: true }
   } catch (err) {
     console.error('Failed to subscribe to web push:', err)
-    savePreference(true) // Still allow local in-browser notifications
+    savePreference(true) // Still allow local notifications
     return { success: true, pushSupported: false, error: err.message }
   }
 }
 
 /**
- * Unsubscribes from Web Push.
+ * Unsubscribes from notifications.
  */
 export async function unsubscribeFromPush() {
   savePreference(false)
+
+  if (isNative) {
+    return { success: true }
+  }
 
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     return { success: true }
@@ -154,12 +192,32 @@ export async function unsubscribeFromPush() {
 }
 
 /**
- * Local notification helper (e.g. for timer alerts).
- * Works via Service Worker registration on mobile & desktop with chime sound.
+ * Send an immediate local notification.
  */
 export async function sendLocalNotification(title, body, options = {}) {
   if (!isGranted()) return
 
+  if (isNative) {
+    try {
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: options.id || Math.floor(Math.random() * 1000000),
+            title,
+            body,
+            sound: 'default',
+            smallIcon: 'ic_launcher_round',
+            extra: options.extra || {}
+          }
+        ]
+      })
+      return
+    } catch (err) {
+      console.warn('Native sendLocalNotification failed, falling back:', err)
+    }
+  }
+
+  // Web Browser fallback
   playGentleChime()
 
   const defaultOptions = {
@@ -189,6 +247,74 @@ export async function sendLocalNotification(title, body, options = {}) {
   }
 }
 
+/**
+ * Schedule a local notification to fire at an exact future date/time.
+ * Works 100% offline via Android AlarmManager on mobile, or in-memory on Web.
+ */
+export async function scheduleNotification({ id, title, body, at, extra }) {
+  if (!isGranted()) return null
+  const notifId = id || Math.floor(Math.random() * 1000000)
+
+  if (isNative) {
+    try {
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: notifId,
+            title,
+            body,
+            schedule: at ? { at: new Date(at) } : undefined,
+            sound: 'default',
+            smallIcon: 'ic_launcher_round',
+            extra: extra || {}
+          }
+        ]
+      })
+      return notifId
+    } catch (err) {
+      console.warn('Native scheduleNotification failed:', err)
+    }
+  }
+
+  // Web fallback: setTimeout if target time is in future
+  if (at) {
+    const delayMs = new Date(at).getTime() - Date.now()
+    if (delayMs > 0) {
+      const timerId = setTimeout(() => {
+        sendLocalNotification(title, body, { id: notifId, extra })
+      }, delayMs)
+      return timerId
+    }
+  }
+
+  await sendLocalNotification(title, body, { id: notifId, extra })
+  return notifId
+}
+
+/**
+ * Cancel a previously scheduled local notification.
+ */
+export async function cancelNotification(id) {
+  if (!id) return
+
+  if (isNative) {
+    try {
+      await LocalNotifications.cancel({ notifications: [{ id }] })
+      return
+    } catch (err) {
+      console.warn('Native cancelNotification failed:', err)
+    }
+  }
+
+  // Web fallback
+  try {
+    clearTimeout(id)
+  } catch {
+    // ignore
+  }
+}
+
 // Backward-compatible alias
 export const sendNotification = sendLocalNotification
+
 

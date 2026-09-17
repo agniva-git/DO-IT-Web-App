@@ -5,5 +5,8 @@
   "server": {
     "url": "https://do-it-web.vercel.app",
     "cleartext": false
+  },
+  "android": {
+    "path": "../do-it-android"
   }
 }

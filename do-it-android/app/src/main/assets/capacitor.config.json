@@ -1,9 +1,12 @@
 {
-	"appId": "com.agniva.doit",
-	"appName": "DO-IT",
-	"webDir": "dist",
-	"server": {
-		"url": "https://do-it-web.vercel.app",
-		"cleartext": false
-	}
+  "appId": "com.agniva.doit",
+  "appName": "DO-IT",
+  "webDir": "dist",
+  "server": {
+    "url": "https://do-it-web.vercel.app",
+    "cleartext": false
+  },
+  "android": {
+    "path": "../do-it-android"
+  }
 }

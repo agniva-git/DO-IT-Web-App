@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Button from '../ui/Button.jsx'
-import { sendNotification } from '../../utils/notifications.js'
+import {
+  sendNotification,
+  scheduleNotification,
+  cancelNotification,
+  isNative
+} from '../../utils/notifications.js'
 
 function formatTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60)
@@ -8,21 +13,49 @@ function formatTime(totalSeconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
+const TIMER_NOTIFICATION_ID = 1001
+
 // How many seconds of elapsed real-world time to allow before treating a
 // "hidden" document event as a system sleep rather than a deliberate tab switch.
-// On a real tab switch the JS clock keeps running; on a system sleep the clock
-// freezes so when we check after resume the gap will be much larger.
 const SLEEP_THRESHOLD_MS = 5000
 
 // phase: 'work' → 'breakOffer' → 'break' → done
-// New phase: 'interrupted' — tab was switched away intentionally.
+// New phase: 'interrupted' — tab was switched away intentionally (desktop web).
 export default function FocusTimer({ label, totalMinutes, breakMinutes, onEnd }) {
   const [phase, setPhase] = useState('work')
   const [remaining, setRemaining] = useState(totalMinutes * 60)
   const [running, setRunning] = useState(true)
-  const [interruptedAt, setInterruptedAt] = useState(null) // timestamp when interrupted
+  const [interruptedAt, setInterruptedAt] = useState(null)
   const intervalRef = useRef(null)
-  const lastTickRef = useRef(Date.now()) // for sleep detection
+  const lastTickRef = useRef(Date.now())
+  const targetEndRef = useRef(null)
+
+  // --- Schedule Native Local Notification when running ---
+  useEffect(() => {
+    if (!running || (phase !== 'work' && phase !== 'break') || remaining <= 0) {
+      cancelNotification(TIMER_NOTIFICATION_ID)
+      targetEndRef.current = null
+      return
+    }
+
+    const targetTime = Date.now() + remaining * 1000
+    targetEndRef.current = targetTime
+
+    const notifTitle = phase === 'work' ? 'Focus session complete! 🎉' : 'Break over ☕'
+    const notifBody =
+      phase === 'work' ? `You finished "${label}". Time for a break.` : 'Ready to get back to it?'
+
+    scheduleNotification({
+      id: TIMER_NOTIFICATION_ID,
+      title: notifTitle,
+      body: notifBody,
+      at: targetTime
+    })
+
+    return () => {
+      cancelNotification(TIMER_NOTIFICATION_ID)
+    }
+  }, [running, phase, label]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Timer tick ---
   useEffect(() => {
@@ -43,6 +76,7 @@ export default function FocusTimer({ label, totalMinutes, breakMinutes, onEnd })
   // --- Natural completion ---
   useEffect(() => {
     if (remaining !== 0) return
+    cancelNotification(TIMER_NOTIFICATION_ID)
     if (phase === 'work') {
       sendNotification('Focus session complete! 🎉', `You finished "${label}". Time for a break.`)
       if (breakMinutes > 0) {
@@ -56,26 +90,30 @@ export default function FocusTimer({ label, totalMinutes, breakMinutes, onEnd })
     }
   }, [remaining, phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // --- Tab switch / visibility detection ---
+  // --- Tab switch / phone sleep detection ---
   const handleVisibilityChange = useCallback(() => {
     if (document.visibilityState === 'hidden') {
-      // Record when we went hidden so we can check on return.
       lastTickRef.current = Date.now()
     } else {
-      // Page became visible again.
-      if (phase !== 'work' || !running) return
+      // Page became visible again
+      if (targetEndRef.current && running) {
+        const secondsLeft = Math.max(0, Math.round((targetEndRef.current - Date.now()) / 1000))
+        setRemaining(secondsLeft)
+      }
 
+      // On native mobile app, locking screen or app backgrounding is normal
+      if (isNative) return
+
+      // On desktop browser: tab switch during work pauses session
+      if (phase !== 'work' || !running) return
       const elapsed = Date.now() - lastTickRef.current
       if (elapsed < SLEEP_THRESHOLD_MS) {
-        // Short gap = real tab switch, not system sleep — mark interrupted.
         clearInterval(intervalRef.current)
         setRunning(false)
         setPhase('interrupted')
         setInterruptedAt(new Date())
+        cancelNotification(TIMER_NOTIFICATION_ID)
       }
-      // Long gap = device woke from sleep — JS timer was paused by the OS.
-      // We let the existing interval-based remaining state stand as-is;
-      // the timer resumes naturally when running stays true.
     }
   }, [phase, running])
 

@@ -20,7 +20,7 @@ def verify_password(plain_password: str, password_hash: str) -> bool:
 
 def create_access_token(subject: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(
-        minutes=settings.access_token_expire_minutes
+        days=settings.access_token_expire_days
     )
     payload = {"sub": subject, "exp": expire, "type": "access"}
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)

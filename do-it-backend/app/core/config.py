@@ -7,8 +7,9 @@ class Settings(BaseSettings):
     database_url: str
     jwt_secret: str
     jwt_algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
-    refresh_token_expire_days: int = 14
+    access_token_expire_days: int = 365
+    access_token_expire_minutes: int = 365 * 24 * 60
+    refresh_token_expire_days: int = 365
     frontend_origin: str = "http://localhost:5173"
 
     smtp_host: str = "smtp.gmail.com"

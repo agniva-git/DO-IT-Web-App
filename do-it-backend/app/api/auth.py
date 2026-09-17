@@ -50,6 +50,7 @@ def _set_auth_cookie(response: Response, token: str) -> None:
         secure=True,
         samesite="none",
         max_age=COOKIE_MAX_AGE,
+        expires=COOKIE_MAX_AGE,
     )
 
 

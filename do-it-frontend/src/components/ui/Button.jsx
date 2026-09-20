@@ -3,12 +3,16 @@ const variants = {
     'bg-gradient-to-b from-focus to-focus/80 text-ink font-semibold ' +
     'shadow-glow-focus hover:shadow-[0_0_32px_rgba(0,201,200,0.4)] hover:from-focus/95 ' +
     'active:scale-[0.97] active:shadow-none',
+  mirage:
+    'bg-gradient-to-r from-[#141E30] to-[#35577D] text-paper font-medium ' +
+    'border border-[#557392]/35 shadow-glow-mirage hover:brightness-110 hover:border-[#7A8CA6]/50 ' +
+    'active:scale-[0.97]',
   ghost:
-    'bg-transparent text-paper border border-white/[0.12] ' +
-    'hover:border-white/[0.25] hover:bg-white/[0.04] active:scale-[0.97]',
+    'bg-transparent text-paper border border-[#35577D]/35 ' +
+    'hover:border-[#557392]/60 hover:bg-[#192A42]/50 active:scale-[0.97]',
   subtle:
-    'bg-surfaceRaised/70 text-paper border border-white/[0.06] ' +
-    'hover:bg-surfaceRaised hover:border-white/[0.12] active:scale-[0.97]',
+    'bg-[#192A42] text-paper border border-[#35577D]/25 ' +
+    'hover:bg-[#1E3552] hover:border-[#35577D]/45 active:scale-[0.97]',
 }
 
 export default function Button({

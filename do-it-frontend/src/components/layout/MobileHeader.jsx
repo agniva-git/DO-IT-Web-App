@@ -8,13 +8,13 @@ export default function MobileHeader() {
   return (
     <>
       <header
-        className="md:hidden sticky top-0 inset-x-0 z-20 flex items-center justify-between px-4 py-2.5 glass border-b"
+        className="md:hidden sticky top-0 inset-x-0 z-20 flex items-center justify-between px-4 py-2.5 bg-[#0A1B2E]/90 backdrop-blur-xl border-b border-[#35577D]/25"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 0.75rem)' }}
       >
         <div className="flex items-center gap-2.5">
           <Link
             to="/dashboard"
-            className="font-display text-lg tracking-tight hover:text-focus transition-colors flex items-center gap-1"
+            className="font-display text-lg tracking-tight hover:text-focus transition-colors flex items-center gap-1 text-paper"
           >
             <span className="text-focus text-xl leading-none">·</span>
             <span>DO-IT</span>
@@ -22,10 +22,10 @@ export default function MobileHeader() {
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-colors duration-200 ${
+              `flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border transition-colors duration-200 ${
                 isActive
-                  ? 'bg-focus/10 border-focus/30 text-focus font-semibold'
-                  : 'bg-white/[0.04] border-white/[0.10] text-paper/60 hover:text-paper hover:border-white/[0.20]'
+                  ? 'bg-gradient-to-r from-[#141E30] to-[#192A42] border-[#35577D]/50 text-paper font-semibold shadow-[inset_0_1px_0_rgba(196,210,225,0.12)]'
+                  : 'bg-[#141E30]/60 border-[#35577D]/20 text-textSecondary hover:text-paper hover:border-[#35577D]/40'
               }`
             }
           >
@@ -40,12 +40,12 @@ export default function MobileHeader() {
         <button
           type="button"
           onClick={() => setNavOpen(true)}
-          className="flex flex-col gap-[5px] p-2 -mr-1 rounded-card hover:bg-white/[0.06] transition-colors"
+          className="flex flex-col gap-[5px] p-2 -mr-1 rounded-card hover:bg-[#141E30] transition-colors"
           aria-label="Open menu"
         >
-          <span className="block w-5 h-[1.5px] bg-paper/60 rounded-full" />
-          <span className="block w-4 h-[1.5px] bg-paper/60 rounded-full" />
-          <span className="block w-5 h-[1.5px] bg-paper/60 rounded-full" />
+          <span className="block w-5 h-[1.5px] bg-[#C4D2E1] rounded-full" />
+          <span className="block w-4 h-[1.5px] bg-[#C4D2E1] rounded-full" />
+          <span className="block w-5 h-[1.5px] bg-[#C4D2E1] rounded-full" />
         </button>
       </header>
 

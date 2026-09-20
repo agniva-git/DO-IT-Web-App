@@ -51,7 +51,7 @@ export default function MobileTabBar() {
   return (
     <>
       <nav
-        className="md:hidden fixed bottom-0 inset-x-0 border-t border-white/[0.06] bg-ink/80 backdrop-blur-xl flex justify-around items-center z-30 px-2 py-2"
+        className="md:hidden fixed bottom-0 inset-x-0 border-t border-[#35577D]/25 bg-[#0A1B2E]/90 backdrop-blur-xl flex justify-around items-center z-30 px-2 py-2"
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 0.5rem)' }}
       >
         {quickTabs.map((tab) => (
@@ -60,7 +60,7 @@ export default function MobileTabBar() {
             to={tab.to}
             className={({ isActive }) =>
               `flex flex-col items-center justify-center flex-1 py-1 gap-1 transition-colors duration-200 ${
-                isActive ? 'text-focus' : 'text-paper/35 hover:text-paper/60'
+                isActive ? 'text-paper font-medium' : 'text-textMuted hover:text-textSecondary'
               }`
             }
           >
@@ -68,9 +68,9 @@ export default function MobileTabBar() {
               <>
                 {TAB_ICONS[tab.to]}
                 <span className="text-[10px] leading-none tracking-wide">{tab.label}</span>
-                {/* Active indicator dot */}
+                {/* Active indicator dot with oceanic glow */}
                 {isActive && (
-                  <span className="absolute bottom-[calc(max(env(safe-area-inset-bottom,0px),0.5rem)+2px)] w-1 h-1 rounded-full bg-focus" />
+                  <span className="absolute bottom-[calc(max(env(safe-area-inset-bottom,0px),0.5rem)+2px)] w-1 h-1 rounded-full bg-[#35577D] shadow-[0_0_8px_#35577D]" />
                 )}
               </>
             )}
@@ -81,7 +81,7 @@ export default function MobileTabBar() {
           type="button"
           onClick={() => setMoreOpen(true)}
           className={`flex flex-col items-center justify-center flex-1 py-1 gap-1 transition-all duration-150 ${
-            isOnMoreOnlyPage ? 'text-focus' : 'text-paper/35 hover:text-paper/60'
+            isOnMoreOnlyPage ? 'text-paper font-medium' : 'text-textMuted hover:text-textSecondary'
           }`}
           aria-label="More navigation options"
         >

@@ -4,33 +4,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── Canvas tiers (3-level depth) ──────────────────────────────────
-        ink:          '#070D18',   // void base — deepest midnight
-        surface:      '#0E1A2D',   // card / panel surface
-        surfaceRaised:'#14243D',   // floating elements (dropdowns, tooltips)
-        surfaceHigh:  '#1A2E4A',   // modal sheet — highest elevation
+        // ── Canvas tiers (Navy Mirage Architecture) ─────────────────────────
+        ink:          '#0A1B2E',   // Deepest oceanic navy base (#01 Deep Navy)
+        surface:      '#141E30',   // Navy Mirage card surface (Image 2)
+        surfaceRaised:'#192A42',   // Floating elements / pills (#141E30 + #35577D midpoint)
+        surfaceHigh:  '#1E3552',   // Modals / Elevated panels (#03 Ocean Depth)
 
-        // ── Borders ───────────────────────────────────────────────────────
-        line:         '#1E2D40',   // default hairline (use border-white/[0.07] via CSS where glass effect needed)
-        lineStrong:   '#2A3949',   // explicit dividers
+        // ── Navy Mirage Accents ─────────────────────────────────────────────
+        mirageDark:   '#141E30',   // Mirage gradient start
+        mirageLight:  '#35577D',   // Mirage gradient end / luminous oceanic navy
+        mirageMuted:  '#557392',   // Blue slate accent (#05 Blue Slate)
 
-        // ── Text tiers ────────────────────────────────────────────────────
-        paper:        '#F8FAFC',   // primary text — soft pearl (was #F5F3EE)
-        textSecondary:'#94A3B8',   // body / secondary
-        textMuted:    '#64748B',   // captions, timestamps
+        // ── Borders ─────────────────────────────────────────────────────────
+        line:         'rgba(53, 87, 125, 0.28)', // subtle Navy Mirage hairline
+        lineStrong:   '#34506D',                 // explicit dividers (#04 Storm Blue)
 
-        // ── Module accents ────────────────────────────────────────────────
+        // ── Text tiers (Arctic & Cloud Blue ladder) ─────────────────────────
+        paper:        '#F2F6FB',   // Primary text — Arctic Haze (#10)
+        textSecondary:'#C4D2E1',   // Body & secondary — Cloud Blue (#08)
+        textMuted:    '#7A8CA6',   // Captions & timestamps — Dusk Blue (#06)
+
+        // ── Module accents ──────────────────────────────────────────────────
         focus:    '#00C9C8',   // electric cyan  — Focus module
         move:     '#F08C3A',   // warm ember     — Fitness module
         plan:     '#818CF8',   // soft indigo    — Tasks/Study module
         reflect:  '#B784C4',   // soft violet    — Analytics/AI
 
-        // ── Semantic states ───────────────────────────────────────────────
+        // ── Semantic states ─────────────────────────────────────────────────
         good:   '#5FAE7A',
         warn:   '#E0A63C',
         danger: '#D9705A',
 
-        // ── Legacy alias (keep for compatibility) ─────────────────────────
+        // ── Legacy alias (keep for compatibility) ───────────────────────────
         paper_old: '#F5F3EE',
       },
 
@@ -81,10 +86,12 @@ export default {
       },
 
       boxShadow: {
-        'glow-focus': '0 0 20px rgba(0, 201, 200, 0.25)',
-        'glow-move':  '0 0 20px rgba(240, 140, 58,  0.25)',
-        'glow-plan':  '0 0 20px rgba(129, 140, 248, 0.25)',
-        'cinematic':  '0 24px 80px rgba(0, 0, 0, 0.6)',
+        'glow-focus':  '0 0 20px rgba(0, 201, 200, 0.25)',
+        'glow-move':   '0 0 20px rgba(240, 140, 58,  0.25)',
+        'glow-plan':   '0 0 20px rgba(129, 140, 248, 0.25)',
+        'glow-mirage': '0 0 24px rgba(53, 87, 125, 0.40)',
+        'cinematic':   '0 24px 80px rgba(10, 27, 46, 0.75)',
+        'card-rim':    'inset 0 1px 0 rgba(196, 210, 225, 0.12), 0 8px 32px rgba(10, 27, 46, 0.55)',
       },
     },
   },

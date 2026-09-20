@@ -7,7 +7,7 @@ export default function Modal({ open, onClose, title, children }) {
     >
       <div
         className="
-          bg-surfaceHigh border-t sm:border border-white/[0.09]
+          bg-surfaceHigh border-t sm:border border-[#35577D]/35
           rounded-t-2xl sm:rounded-card
           p-5 sm:p-6
           w-full max-w-lg max-h-[90dvh] sm:max-h-[85vh]
@@ -19,14 +19,14 @@ export default function Modal({ open, onClose, title, children }) {
         style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 1.25rem)' }}
       >
         {/* Bottom-sheet drag handle — mobile only */}
-        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
+        <div className="w-10 h-1 bg-[#7A8CA6]/40 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
 
         <div className="flex items-center justify-between mb-4 shrink-0">
-          <h3 className="font-display text-lg sm:text-xl pr-4">{title}</h3>
+          <h3 className="font-display text-lg sm:text-xl pr-4 text-paper">{title}</h3>
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-paper/40 hover:text-paper hover:bg-white/[0.08] transition-colors text-2xl leading-none shrink-0"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-textMuted hover:text-paper hover:bg-[#141E30] transition-colors text-2xl leading-none shrink-0"
             aria-label="Close"
           >
             ×

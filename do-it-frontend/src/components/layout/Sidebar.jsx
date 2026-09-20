@@ -12,9 +12,9 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/[0.06] bg-ink px-3 py-6 gap-0.5">
+    <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-[#35577D]/25 bg-ink px-3 py-6 gap-0.5">
       {/* Logo */}
-      <span className="font-display text-xl px-3 mb-7 flex items-center gap-1.5">
+      <span className="font-display text-xl px-3 mb-7 flex items-center gap-1.5 text-paper">
         <span className="text-focus">·</span>
         <span>DO-IT</span>
       </span>
@@ -26,15 +26,15 @@ export default function Sidebar() {
           className={({ isActive }) =>
             `relative px-3 py-2.5 rounded-card text-sm transition-colors duration-200 ${
               isActive
-                ? 'text-paper bg-white/[0.06] font-medium'
-                : 'text-paper/50 hover:text-paper/80 hover:bg-white/[0.04]'
+                ? 'text-paper bg-gradient-to-r from-[#141E30] to-[#192A42] font-medium shadow-[inset_0_1px_0_rgba(196,210,225,0.08)]'
+                : 'text-textSecondary/70 hover:text-paper hover:bg-[#141E30]/60'
             }`
           }
         >
           {({ isActive }) => (
             <>
               {isActive && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-focus rounded-r-full" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-gradient-to-b from-[#00C9C8] to-[#35577D] rounded-r-full" />
               )}
               {item.label}
             </>
@@ -42,14 +42,14 @@ export default function Sidebar() {
         </NavLink>
       ))}
 
-      <div className="mt-auto pt-4 border-t border-white/[0.06] flex flex-col gap-0.5">
+      <div className="mt-auto pt-4 border-t border-[#35577D]/25 flex flex-col gap-0.5">
         {user && (
-          <span className="px-3 text-xs text-paper/25 truncate mb-1">{user.email}</span>
+          <span className="px-3 text-xs text-textMuted/60 truncate mb-1">{user.email}</span>
         )}
         <button
           type="button"
           onClick={handleLogout}
-          className="px-3 py-2.5 rounded-card text-sm text-left text-paper/40 hover:text-danger hover:bg-white/[0.04] transition-all duration-150"
+          className="px-3 py-2.5 rounded-card text-sm text-left text-textMuted hover:text-danger hover:bg-[#141E30]/60 transition-all duration-150"
         >
           Log out
         </button>

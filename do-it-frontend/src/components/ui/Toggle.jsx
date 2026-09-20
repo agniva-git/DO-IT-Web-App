@@ -14,21 +14,21 @@ export default function Toggle({ checked, onChange, label, disabled = false }) {
         className={`
           w-11 h-6 rounded-full relative shrink-0
           transition-all duration-200
-          border-0 outline-none
+          border outline-none
           ${checked
-            ? 'bg-focus shadow-glow-focus'
-            : 'bg-white/[0.12]'}
-          ${disabled ? 'cursor-not-allowed' : ''}
+            ? 'bg-gradient-to-r from-[#141E30] to-[#35577D] border-[#557392]/50 shadow-glow-mirage'
+            : 'bg-[#192A42] border-[#35577D]/35'}
+          ${disabled ? 'cursor-not-allowed opacity-50' : ''}
         `}
       >
         <span
           className={`
             absolute top-0.5 w-5 h-5 rounded-full
             border-0 outline-none
-            shadow-[0_1px_4px_rgba(0,0,0,0.5)]
+            shadow-[0_1px_4px_rgba(10,27,46,0.6)]
             transition-all duration-200
             ${checked
-              ? 'translate-x-[22px] bg-ink'
+              ? 'translate-x-[22px] bg-paper'
               : 'translate-x-0.5 bg-paper/90'}
           `}
         />

@@ -10,7 +10,7 @@ export default function Input({ label, id, error, className = '', type, onWheel,
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={id} className="text-sm text-textSecondary">
+        <label htmlFor={id} className="text-sm text-textSecondary font-medium">
           {label}
         </label>
       )}
@@ -19,11 +19,11 @@ export default function Input({ label, id, error, className = '', type, onWheel,
         type={type}
         onWheel={handleWheel}
         className={`
-          bg-surfaceRaised/50 border border-white/[0.10] rounded-card
+          bg-[#0F1A2B] border border-[#34506D]/45 rounded-card
           px-4 py-3 text-base sm:text-sm text-paper
-          placeholder:text-paper/25
+          placeholder:text-textMuted/60
           transition-colors duration-200
-          focus:outline-none focus:border-focus/50 focus:ring-2 focus:ring-focus/[0.15]
+          focus:outline-none focus:border-[#35577D] focus:ring-2 focus:ring-[#35577D]/25
           ${className}
         `}
         {...props}

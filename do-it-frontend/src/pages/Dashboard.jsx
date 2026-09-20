@@ -275,7 +275,7 @@ export default function Dashboard() {
         <h1 className="font-display text-2xl sm:text-3xl">
           Hello, {user?.name} 👋
         </h1>
-        <p className="text-paper/50 mt-0.5 text-sm sm:text-base">{formatDateLong(new Date())}</p>
+        <p className="text-textSecondary mt-0.5 text-sm sm:text-base">{formatDateLong(new Date())}</p>
       </header>
 
       {error && <p className="text-sm text-danger mb-4">{error}</p>}

@@ -19,11 +19,11 @@ export default function Input({ label, id, error, className = '', type, onWheel,
         type={type}
         onWheel={handleWheel}
         className={`
-          bg-[#0F1A2B] border border-[#34506D]/45 rounded-card
+          bg-[#08162A] border border-[#1B4167]/50 rounded-card
           px-4 py-3 text-base sm:text-sm text-paper
           placeholder:text-textMuted/60
           transition-colors duration-200
-          focus:outline-none focus:border-[#35577D] focus:ring-2 focus:ring-[#35577D]/25
+          focus:outline-none focus:border-[#1B4167] focus:ring-2 focus:ring-[#1B4167]/30
           ${className}
         `}
         {...props}

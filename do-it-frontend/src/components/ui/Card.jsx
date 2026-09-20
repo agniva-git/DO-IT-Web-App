@@ -10,16 +10,16 @@ export default function Card({
   return (
     <div
       className={[
-        // Base Navy Mirage surface or signature gradient
+        // Midnight Blue surface (#0B1D3A) or signature gradient (#0B1D3A to #1B4167)
         isMirage
-          ? 'bg-gradient-to-r from-[#141E30] to-[#35577D] border border-[#557392]/30 shadow-card-rim'
-          : 'bg-surface border border-[#35577D]/25 shadow-card-rim',
+          ? 'bg-gradient-to-r from-[#0B1D3A] to-[#1B4167] border border-[#6E88A3]/30 shadow-card-rim'
+          : 'bg-surface border border-[#1B4167]/35 shadow-card-rim',
         'rounded-card p-4 sm:p-6',
         // Entrance animation
         'animate-fadeUp',
         // Interactive press feel (opt-in)
         interactive
-          ? 'cursor-pointer hover:border-[#35577D]/50 hover:shadow-glow-mirage active:scale-[0.98]'
+          ? 'cursor-pointer hover:border-[#1B4167]/65 hover:shadow-glow-midnight active:scale-[0.98]'
           : '',
         className,
       ]

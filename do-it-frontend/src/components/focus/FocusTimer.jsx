@@ -65,7 +65,7 @@ function ArcRing({ pct, isBreak }) {
       <path
         d={arcPath(START_DEG, SWEEP_DEG)}
         fill="none"
-        stroke="rgba(53, 87, 125, 0.25)"
+        stroke="rgba(27, 65, 103, 0.35)"
         strokeWidth={STROKE}
         strokeLinecap="round"
       />
@@ -202,10 +202,10 @@ export default function FocusTimer({ label, totalMinutes, breakMinutes, onEnd })
   // ── Radial background haze ────────────────────────────────────────────────
   const hazeColor = phase === 'break' || phase === 'breakOffer'
     ? 'rgba(240,140,58,0.12)'
-    : 'rgba(53,87,125,0.40)'
+    : 'rgba(27,65,103,0.45)'
 
   const bgStyle = {
-    background: `radial-gradient(ellipse 75% 65% at 50% 38%, ${hazeColor}, #0A1B2E 85%)`,
+    background: `radial-gradient(ellipse 75% 65% at 50% 38%, ${hazeColor}, #06101F 85%)`,
   }
 
   // ── interrupted ──────────────────────────────────────────────────────────

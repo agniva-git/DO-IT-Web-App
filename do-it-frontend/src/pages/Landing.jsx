@@ -4,10 +4,10 @@ import Button from '../components/ui/Button.jsx'
 // Full class strings written out literally (not built via template strings)
 // so Tailwind's JIT scanner can actually find and generate them at build time.
 const loop = [
-  { key: 'PLAN',    desc: 'Tasks, study goals, deadlines.',              badge: 'bg-plan/15 text-plan',    accent: 'border-l-plan/50' },
-  { key: 'FOCUS',   desc: 'Timed sessions, distraction-free.',           badge: 'bg-focus/15 text-focus',  accent: 'border-l-focus/50' },
-  { key: 'MOVE',    desc: 'Workouts that fit the day you actually had.', badge: 'bg-move/15 text-move',    accent: 'border-l-move/50' },
-  { key: 'REFLECT', desc: 'What the data says, in plain language.',      badge: 'bg-reflect/15 text-reflect', accent: 'border-l-reflect/50' },
+  { key: 'PLAN',    desc: 'Tasks, study goals, deadlines.',              badge: 'bg-plan/15 text-plan',    accent: 'border-l-plan/60' },
+  { key: 'FOCUS',   desc: 'Timed sessions, distraction-free.',           badge: 'bg-focus/15 text-focus',  accent: 'border-l-focus/60' },
+  { key: 'MOVE',    desc: 'Workouts that fit the day you actually had.', badge: 'bg-move/15 text-move',    accent: 'border-l-move/60' },
+  { key: 'REFLECT', desc: 'What the data says, in plain language.',      badge: 'bg-reflect/15 text-reflect', accent: 'border-l-reflect/60' },
 ]
 
 export default function Landing() {
@@ -15,7 +15,7 @@ export default function Landing() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: 'radial-gradient(ellipse 90% 60% at 50% -5%, rgba(53,87,125,0.45) 0%, #0A1B2E 70%)',
+        background: 'radial-gradient(ellipse 90% 60% at 50% -5%, rgba(27,65,103,0.50) 0%, #06101F 72%)',
       }}
     >
       {/* Nav */}
@@ -41,7 +41,7 @@ export default function Landing() {
           </p>
           <h1 className="font-display text-4xl md:text-6xl leading-tight text-paper">
             Not every minute deserves a plan. Just the ones that{' '}
-            <span className="text-focus" style={{ textShadow: '0 0 40px rgba(0,201,200,0.3)' }}>
+            <span className="text-focus" style={{ textShadow: '0 0 40px rgba(0,201,200,0.35)' }}>
               matter.
             </span>
           </h1>
@@ -59,9 +59,9 @@ export default function Landing() {
               key={step.key}
               className={`
                 relative flex flex-col gap-2 p-5 rounded-card
-                bg-[#141E30] border border-[#35577D]/35 border-l-2 ${step.accent}
-                shadow-[inset_0_1px_0_rgba(196,210,225,0.08),0_8px_24px_rgba(10,27,46,0.5)]
-                transition-all duration-200 hover:bg-[#192A42] hover:border-[#35577D]/60
+                bg-[#0B1D3A] border border-[#1B4167]/40 border-l-2 ${step.accent}
+                shadow-[inset_0_1px_0_rgba(244,241,234,0.08),0_8px_24px_rgba(6,16,31,0.60)]
+                transition-all duration-200 hover:bg-[#102A4C] hover:border-[#1B4167]/70
                 animate-fadeUp
               `}
               style={{ animationDelay: `${i * 80}ms` }}
@@ -84,7 +84,7 @@ export default function Landing() {
         </Link>
       </main>
 
-      <footer className="px-6 md:px-12 py-8 text-center text-sm text-textMuted/60">
+      <footer className="px-6 md:px-12 py-8 text-center text-sm text-textMuted/70">
         Built for students juggling more than a to-do list can hold.
       </footer>
     </div>

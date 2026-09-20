@@ -16,8 +16,8 @@ export default function Toggle({ checked, onChange, label, disabled = false }) {
           transition-all duration-200
           border outline-none
           ${checked
-            ? 'bg-gradient-to-r from-[#141E30] to-[#35577D] border-[#557392]/50 shadow-glow-mirage'
-            : 'bg-[#192A42] border-[#35577D]/35'}
+            ? 'bg-gradient-to-r from-[#0B1D3A] to-[#1B4167] border-[#6E88A3]/50 shadow-glow-mirage'
+            : 'bg-[#102A4C] border-[#1B4167]/45'}
           ${disabled ? 'cursor-not-allowed opacity-50' : ''}
         `}
       >
@@ -25,7 +25,7 @@ export default function Toggle({ checked, onChange, label, disabled = false }) {
           className={`
             absolute top-0.5 w-5 h-5 rounded-full
             border-0 outline-none
-            shadow-[0_1px_4px_rgba(10,27,46,0.6)]
+            shadow-[0_1px_4px_rgba(6,16,31,0.6)]
             transition-all duration-200
             ${checked
               ? 'translate-x-[22px] bg-paper'

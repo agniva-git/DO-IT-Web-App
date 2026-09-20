@@ -4,15 +4,15 @@ const variants = {
     'shadow-glow-focus hover:shadow-[0_0_32px_rgba(0,201,200,0.4)] hover:from-focus/95 ' +
     'active:scale-[0.97] active:shadow-none',
   mirage:
-    'bg-gradient-to-r from-[#141E30] to-[#35577D] text-paper font-medium ' +
-    'border border-[#557392]/35 shadow-glow-mirage hover:brightness-110 hover:border-[#7A8CA6]/50 ' +
+    'bg-gradient-to-r from-[#0B1D3A] to-[#1B4167] text-paper font-medium ' +
+    'border border-[#6E88A3]/35 shadow-glow-mirage hover:brightness-115 hover:border-[#6E88A3]/60 ' +
     'active:scale-[0.97]',
   ghost:
-    'bg-transparent text-paper border border-[#35577D]/35 ' +
-    'hover:border-[#557392]/60 hover:bg-[#192A42]/50 active:scale-[0.97]',
+    'bg-transparent text-paper border border-[#1B4167]/45 ' +
+    'hover:border-[#6E88A3]/50 hover:bg-[#102A4C]/50 active:scale-[0.97]',
   subtle:
-    'bg-[#192A42] text-paper border border-[#35577D]/25 ' +
-    'hover:bg-[#1E3552] hover:border-[#35577D]/45 active:scale-[0.97]',
+    'bg-[#102A4C] text-paper border border-[#1B4167]/30 ' +
+    'hover:bg-[#1B4167] hover:border-[#6E88A3]/40 active:scale-[0.97]',
 }
 
 export default function Button({

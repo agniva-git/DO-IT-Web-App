@@ -8,7 +8,7 @@ export default function MobileHeader() {
   return (
     <>
       <header
-        className="md:hidden sticky top-0 inset-x-0 z-20 flex items-center justify-between px-4 py-2.5 bg-[#0A1B2E]/90 backdrop-blur-xl border-b border-[#35577D]/25"
+        className="md:hidden sticky top-0 inset-x-0 z-20 flex items-center justify-between px-4 py-2.5 bg-[#06101F]/90 backdrop-blur-xl border-b border-[#1B4167]/30"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 0.75rem)' }}
       >
         <div className="flex items-center gap-2.5">
@@ -24,8 +24,8 @@ export default function MobileHeader() {
             className={({ isActive }) =>
               `flex items-center gap-1.5 text-xs font-medium px-3 py-1 rounded-full border transition-colors duration-200 ${
                 isActive
-                  ? 'bg-gradient-to-r from-[#141E30] to-[#192A42] border-[#35577D]/50 text-paper font-semibold shadow-[inset_0_1px_0_rgba(196,210,225,0.12)]'
-                  : 'bg-[#141E30]/60 border-[#35577D]/20 text-textSecondary hover:text-paper hover:border-[#35577D]/40'
+                  ? 'bg-gradient-to-r from-[#0B1D3A] to-[#102A4C] border-[#1B4167]/60 text-paper font-semibold shadow-[inset_0_1px_0_rgba(244,241,234,0.12)]'
+                  : 'bg-[#0B1D3A]/60 border-[#1B4167]/30 text-textSecondary hover:text-paper hover:border-[#1B4167]/50'
               }`
             }
           >
@@ -40,12 +40,12 @@ export default function MobileHeader() {
         <button
           type="button"
           onClick={() => setNavOpen(true)}
-          className="flex flex-col gap-[5px] p-2 -mr-1 rounded-card hover:bg-[#141E30] transition-colors"
+          className="flex flex-col gap-[5px] p-2 -mr-1 rounded-card hover:bg-[#0B1D3A] transition-colors"
           aria-label="Open menu"
         >
-          <span className="block w-5 h-[1.5px] bg-[#C4D2E1] rounded-full" />
-          <span className="block w-4 h-[1.5px] bg-[#C4D2E1] rounded-full" />
-          <span className="block w-5 h-[1.5px] bg-[#C4D2E1] rounded-full" />
+          <span className="block w-5 h-[1.5px] bg-[#C8D6E5] rounded-full" />
+          <span className="block w-4 h-[1.5px] bg-[#C8D6E5] rounded-full" />
+          <span className="block w-5 h-[1.5px] bg-[#C8D6E5] rounded-full" />
         </button>
       </header>
 

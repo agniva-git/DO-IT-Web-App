@@ -4,38 +4,40 @@ export default {
   theme: {
     extend: {
       colors: {
-        // ── Canvas tiers (Navy Mirage Architecture) ─────────────────────────
-        ink:          '#0A1B2E',   // Deepest oceanic navy base (#01 Deep Navy)
-        surface:      '#141E30',   // Navy Mirage card surface (Image 2)
-        surfaceRaised:'#192A42',   // Floating elements / pills (#141E30 + #35577D midpoint)
-        surfaceHigh:  '#1E3552',   // Modals / Elevated panels (#03 Ocean Depth)
+        // ── Canvas tiers (Midnight Blue Palette — #0B1D3A System) ─────────
+        ink:          '#06101F',   // Swatch 1: Deepest inky void
+        surface:      '#0B1D3A',   // Swatch 2: Core Bang Chan Midnight Blue
+        surfaceRaised:'#102A4C',   // Swatch 3: Lifted cards & panels
+        surfaceHigh:  '#1B4167',   // Swatch 4: Modals, elevated drawers & highlight rims
 
-        // ── Navy Mirage Accents ─────────────────────────────────────────────
-        mirageDark:   '#141E30',   // Mirage gradient start
-        mirageLight:  '#35577D',   // Mirage gradient end / luminous oceanic navy
-        mirageMuted:  '#557392',   // Blue slate accent (#05 Blue Slate)
+        // ── Midnight Blue Accents & Metals ──────────────────────────────────
+        midnightCore: '#0B1D3A',   // Swatch 2
+        midnightCard: '#102A4C',   // Swatch 3
+        midnightRim:  '#1B4167',   // Swatch 4: Brushed steel-navy
+        slateDusk:    '#6E88A3',   // Swatch 5: Dusk slate
 
         // ── Borders ─────────────────────────────────────────────────────────
-        line:         'rgba(53, 87, 125, 0.28)', // subtle Navy Mirage hairline
-        lineStrong:   '#34506D',                 // explicit dividers (#04 Storm Blue)
+        line:         'rgba(27, 65, 103, 0.38)', // Hairline border derived from #1B4167
+        lineStrong:   '#1B4167',                 // Explicit dividers
 
-        // ── Text tiers (Arctic & Cloud Blue ladder) ─────────────────────────
-        paper:        '#F2F6FB',   // Primary text — Arctic Haze (#10)
-        textSecondary:'#C4D2E1',   // Body & secondary — Cloud Blue (#08)
-        textMuted:    '#7A8CA6',   // Captions & timestamps — Dusk Blue (#06)
+        // ── Text tiers (Archival Parchment & Platinum scale) ───────────────
+        paper:        '#F4F1EA',   // Archival warm parchment from the labels in reference
+        paperWarm:    '#E5E0D5',   // Vintage ticket badge cream
+        textSecondary:'#C8D6E5',   // Body text & descriptions — high contrast, gentle on eyes
+        textMuted:    '#6E88A3',   // Swatch 5: Captions, metadata, inactive icons
 
         // ── Module accents ──────────────────────────────────────────────────
-        focus:    '#00C9C8',   // electric cyan  — Focus module
-        move:     '#F08C3A',   // warm ember     — Fitness module
-        plan:     '#818CF8',   // soft indigo    — Tasks/Study module
-        reflect:  '#B784C4',   // soft violet    — Analytics/AI
+        focus:    '#00C9C8',   // Electric cyan  — Focus module
+        move:     '#F08C3A',   // Warm ember     — Fitness module
+        plan:     '#818CF8',   // Soft indigo    — Tasks/Study module
+        reflect:  '#B784C4',   // Soft violet    — Analytics/AI
 
         // ── Semantic states ─────────────────────────────────────────────────
         good:   '#5FAE7A',
         warn:   '#E0A63C',
         danger: '#D9705A',
 
-        // ── Legacy alias (keep for compatibility) ───────────────────────────
+        // ── Legacy alias ────────────────────────────────────────────────────
         paper_old: '#F5F3EE',
       },
 
@@ -86,12 +88,13 @@ export default {
       },
 
       boxShadow: {
-        'glow-focus':  '0 0 20px rgba(0, 201, 200, 0.25)',
-        'glow-move':   '0 0 20px rgba(240, 140, 58,  0.25)',
-        'glow-plan':   '0 0 20px rgba(129, 140, 248, 0.25)',
-        'glow-mirage': '0 0 24px rgba(53, 87, 125, 0.40)',
-        'cinematic':   '0 24px 80px rgba(10, 27, 46, 0.75)',
-        'card-rim':    'inset 0 1px 0 rgba(196, 210, 225, 0.12), 0 8px 32px rgba(10, 27, 46, 0.55)',
+        'glow-focus':    '0 0 20px rgba(0, 201, 200, 0.25)',
+        'glow-move':     '0 0 20px rgba(240, 140, 58,  0.25)',
+        'glow-plan':     '0 0 20px rgba(129, 140, 248, 0.25)',
+        'glow-mirage':   '0 0 24px rgba(27, 65, 103, 0.50)',
+        'glow-midnight': '0 0 28px rgba(11, 29, 58, 0.65)',
+        'cinematic':     '0 24px 80px rgba(6, 16, 31, 0.85)',
+        'card-rim':      'inset 0 1px 0 rgba(244, 241, 234, 0.10), 0 8px 32px rgba(6, 16, 31, 0.60)',
       },
     },
   },

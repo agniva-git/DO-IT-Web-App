@@ -24,7 +24,7 @@ export default function Button({
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-card font-medium transition-all duration-150 ease-spring disabled:opacity-40 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-card font-medium disabled:opacity-40 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
       {...props}
     >
       {loading && (

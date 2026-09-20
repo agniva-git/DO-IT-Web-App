@@ -22,7 +22,7 @@ export default function Input({ label, id, error, className = '', type, onWheel,
           bg-surfaceRaised/50 border border-white/[0.10] rounded-card
           px-4 py-3 text-base sm:text-sm text-paper
           placeholder:text-paper/25
-          transition-all duration-150
+          transition-colors duration-200
           focus:outline-none focus:border-focus/50 focus:ring-2 focus:ring-focus/[0.15]
           ${className}
         `}

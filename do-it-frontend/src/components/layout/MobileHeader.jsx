@@ -22,7 +22,7 @@ export default function MobileHeader() {
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>
-              `flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-all duration-150 ${
+              `flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-colors duration-200 ${
                 isActive
                   ? 'bg-focus/10 border-focus/30 text-focus font-semibold'
                   : 'bg-white/[0.04] border-white/[0.10] text-paper/60 hover:text-paper hover:border-white/[0.20]'

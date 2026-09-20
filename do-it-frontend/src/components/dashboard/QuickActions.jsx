@@ -39,7 +39,7 @@ export default function QuickActions({ onStartFocus, onAddTask, onLogWorkout, on
             flex items-center justify-center py-2.5 px-3 sm:px-4
             rounded-card border border-white/[0.08] border-l-2
             bg-white/[0.03] text-sm font-medium
-            transition-all duration-150 ease-spring
+            transition-colors duration-200
             active:scale-[0.96]
             ${accent}
           `}

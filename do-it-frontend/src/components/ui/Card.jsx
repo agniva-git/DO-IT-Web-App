@@ -11,7 +11,7 @@ export default function Card({ children, className = '', onClick, interactive = 
         'animate-fadeUp',
         // Interactive press feel (opt-in)
         interactive
-          ? 'cursor-pointer transition-transform duration-150 ease-spring active:scale-[0.98] hover:border-white/[0.12]'
+          ? 'cursor-pointer hover:border-white/[0.14] active:scale-[0.98]'
           : '',
         className,
       ]

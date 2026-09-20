@@ -26,7 +26,7 @@ export default function Toggle({ checked, onChange, label, disabled = false }) {
             absolute top-0.5 w-5 h-5 rounded-full
             border-0 outline-none
             shadow-[0_1px_4px_rgba(0,0,0,0.5)]
-            transition-all duration-200 ease-spring
+            transition-all duration-200
             ${checked
               ? 'translate-x-[22px] bg-ink'
               : 'translate-x-0.5 bg-paper/90'}

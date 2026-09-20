@@ -59,7 +59,7 @@ export default function MobileTabBar() {
             key={tab.to}
             to={tab.to}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center flex-1 py-1 gap-1 transition-all duration-150 ${
+              `flex flex-col items-center justify-center flex-1 py-1 gap-1 transition-colors duration-200 ${
                 isActive ? 'text-focus' : 'text-paper/35 hover:text-paper/60'
               }`
             }

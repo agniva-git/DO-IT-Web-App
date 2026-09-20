@@ -18,7 +18,7 @@ export default function MultiSelectChips({ options, values, onChange }) {
             onClick={() => toggle(opt)}
             className={`
               whitespace-nowrap px-4 py-2.5 rounded-card border text-sm
-              transition-all duration-150 ease-spring active:scale-[0.96]
+              transition-colors duration-200 active:scale-[0.96]
               ${selected
                 ? 'border-move/50 bg-move/10 text-paper'
                 : 'border-white/[0.10] bg-white/[0.03] text-paper/60 hover:border-white/[0.20] hover:text-paper'}

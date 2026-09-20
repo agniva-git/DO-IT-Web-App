@@ -24,7 +24,7 @@ export default function Sidebar() {
           key={item.to}
           to={item.to}
           className={({ isActive }) =>
-            `relative px-3 py-2.5 rounded-card text-sm transition-all duration-150 ${
+            `relative px-3 py-2.5 rounded-card text-sm transition-colors duration-200 ${
               isActive
                 ? 'text-paper bg-white/[0.06] font-medium'
                 : 'text-paper/50 hover:text-paper/80 hover:bg-white/[0.04]'

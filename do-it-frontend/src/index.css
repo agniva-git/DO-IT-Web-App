@@ -73,6 +73,30 @@
   .glow-plan {
     box-shadow: 0 0 22px rgba(129, 140, 248, 0.28);
   }
+
+  /*
+   * Smooth base for ALL interactive elements.
+   * Colors, shadows, opacity → 220ms ease-out (silky, never overshoots).
+   * Transform (scale, translate) → 140ms spring (snappy press pop).
+   * Tailwind utility classes will override duration/easing when needed.
+   */
+  button,
+  a,
+  [role="button"],
+  [role="switch"],
+  input,
+  select,
+  textarea,
+  label[class*="cursor"] {
+    transition:
+      color          220ms cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 220ms cubic-bezier(0.4, 0, 0.2, 1),
+      border-color   220ms cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow     280ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity        220ms cubic-bezier(0.4, 0, 0.2, 1),
+      transform      140ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

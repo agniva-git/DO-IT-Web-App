@@ -23,6 +23,10 @@ export function onLoadingChange(fn) {
 
 api.interceptors.request.use(
   (config) => {
+    const token = localStorage.getItem('do_it_token')
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     activeRequests++
     notify()
     return config
@@ -34,7 +38,7 @@ api.interceptors.request.use(
   }
 )
 
-// If the server returns 401 (expired or missing cookie), redirect to login
+// If the server returns 401 (expired or invalid token), redirect to login
 // rather than showing confusing "Is the backend running?" messages.
 // We skip the interceptor for the /users/me call that AuthContext uses to
 // check session status — that one handles 401 itself.
@@ -52,7 +56,8 @@ api.interceptors.response.use(
       !err.config?.url?.includes('/users/me') &&
       !err.config?.url?.includes('/auth/')
     ) {
-      // Session expired mid-use — send them back to login.
+      localStorage.removeItem('do_it_token')
+      localStorage.removeItem('do_it_cached_user')
       window.location.href = '/login'
     }
     return Promise.reject(err)

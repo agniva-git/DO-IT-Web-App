@@ -47,6 +47,7 @@ class UserOut(BaseModel):
     username: str
     email: EmailStr
     whatsapp_number: str | None = None
+    token: str | None = None
 
     class Config:
         from_attributes = True

@@ -95,7 +95,9 @@ def register(payload: UserCreate, response: Response, db: Session = Depends(get_
 
     token = create_access_token(str(user.id))
     _set_auth_cookie(response, token)
-    return user
+    user_out = UserOut.model_validate(user)
+    user_out.token = token
+    return user_out
 
 
 @router.post("/login", response_model=UserOut)
@@ -114,7 +116,9 @@ def login(payload: LoginRequest, response: Response, db: Session = Depends(get_d
 
     token = create_access_token(str(user.id))
     _set_auth_cookie(response, token)
-    return user
+    user_out = UserOut.model_validate(user)
+    user_out.token = token
+    return user_out
 
 
 @router.post("/logout")

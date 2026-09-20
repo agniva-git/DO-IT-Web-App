@@ -12,32 +12,44 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-line px-4 py-6 gap-1">
-      <span className="font-display text-xl px-3 mb-6">DO-IT</span>
+    <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/[0.06] bg-ink px-3 py-6 gap-0.5">
+      {/* Logo */}
+      <span className="font-display text-xl px-3 mb-7 flex items-center gap-1.5">
+        <span className="text-focus">·</span>
+        <span>DO-IT</span>
+      </span>
+
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}
           to={item.to}
           className={({ isActive }) =>
-            `px-3 py-2.5 rounded-card text-sm transition-colors ${
+            `relative px-3 py-2.5 rounded-card text-sm transition-all duration-150 ${
               isActive
-                ? 'bg-plan/15 text-plan'
-                : 'text-paper/60 hover:text-paper hover:bg-surfaceRaised'
+                ? 'text-paper bg-white/[0.06] font-medium'
+                : 'text-paper/50 hover:text-paper/80 hover:bg-white/[0.04]'
             }`
           }
         >
-          {item.label}
+          {({ isActive }) => (
+            <>
+              {isActive && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-focus rounded-r-full" />
+              )}
+              {item.label}
+            </>
+          )}
         </NavLink>
       ))}
 
-      <div className="mt-auto pt-4 border-t border-line flex flex-col gap-1">
+      <div className="mt-auto pt-4 border-t border-white/[0.06] flex flex-col gap-0.5">
         {user && (
-          <span className="px-3 text-xs text-paper/30 truncate">{user.email}</span>
+          <span className="px-3 text-xs text-paper/25 truncate mb-1">{user.email}</span>
         )}
         <button
           type="button"
           onClick={handleLogout}
-          className="px-3 py-2.5 rounded-card text-sm text-left text-paper/50 hover:text-danger hover:bg-surfaceRaised transition-colors"
+          className="px-3 py-2.5 rounded-card text-sm text-left text-paper/40 hover:text-danger hover:bg-white/[0.04] transition-all duration-150"
         >
           Log out
         </button>

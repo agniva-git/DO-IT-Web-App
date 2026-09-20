@@ -9,33 +9,40 @@ export default function QuickActions({ onStartFocus, onAddTask, onLogWorkout, on
     {
       label: '⏱ Focus',
       handler: onStartFocus,
-      color: 'text-focus border-focus/30 hover:bg-focus/10'
+      accent: 'border-l-focus/60 text-focus hover:bg-focus/[0.08]',
     },
     {
       label: '+ Task',
       handler: onAddTask,
-      color: 'text-plan border-plan/30 hover:bg-plan/10'
+      accent: 'border-l-plan/60 text-plan hover:bg-plan/[0.08]',
     },
     {
       label: '💪 Workout',
       handler: onLogWorkout,
-      color: 'text-move border-move/30 hover:bg-move/10'
+      accent: 'border-l-move/60 text-move hover:bg-move/[0.08]',
     },
     {
       label: '+ Expense',
       handler: onLogExpense,
-      color: 'text-good border-good/30 hover:bg-good/10'
-    }
+      accent: 'border-l-good/60 text-good hover:bg-good/[0.08]',
+    },
   ]
 
   return (
     <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-2.5">
-      {actions.map(({ label, handler, color }) => (
+      {actions.map(({ label, handler, accent }) => (
         <button
           key={label}
           type="button"
           onClick={handler}
-          className={`flex items-center justify-center py-2.5 px-3 sm:px-4 rounded-card border text-sm font-medium transition-colors ${color}`}
+          className={`
+            flex items-center justify-center py-2.5 px-3 sm:px-4
+            rounded-card border border-white/[0.08] border-l-2
+            bg-white/[0.03] text-sm font-medium
+            transition-all duration-150 ease-spring
+            active:scale-[0.96]
+            ${accent}
+          `}
         >
           {label}
         </button>

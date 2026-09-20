@@ -1,7 +1,14 @@
 const variants = {
-  primary: 'bg-plan text-ink hover:bg-plan/90',
-  ghost: 'bg-transparent text-paper border border-line hover:border-paper/40',
-  subtle: 'bg-surfaceRaised text-paper hover:bg-surfaceRaised/80'
+  primary:
+    'bg-gradient-to-b from-focus to-focus/80 text-ink font-semibold ' +
+    'shadow-glow-focus hover:shadow-[0_0_32px_rgba(0,201,200,0.4)] hover:from-focus/95 ' +
+    'active:scale-[0.97] active:shadow-none',
+  ghost:
+    'bg-transparent text-paper border border-white/[0.12] ' +
+    'hover:border-white/[0.25] hover:bg-white/[0.04] active:scale-[0.97]',
+  subtle:
+    'bg-surfaceRaised/70 text-paper border border-white/[0.06] ' +
+    'hover:bg-surfaceRaised hover:border-white/[0.12] active:scale-[0.97]',
 }
 
 export default function Button({
@@ -17,7 +24,7 @@ export default function Button({
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-card font-medium transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-card font-medium transition-all duration-150 ease-spring disabled:opacity-40 disabled:cursor-not-allowed ${variants[variant]} ${className}`}
       {...props}
     >
       {loading && (

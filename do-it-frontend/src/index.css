@@ -7,6 +7,19 @@
     color-scheme: dark;
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Themed text selection */
+  ::selection {
+    background-color: rgba(0, 201, 200, 0.18);
+    color: #F8FAFC;
+  }
+
   * {
     @apply border-line;
   }
@@ -17,7 +30,7 @@
     outline-offset: 2px;
   }
 
-  /* Disable spin buttons on number inputs to prevent accidental changes and visual clutter */
+  /* Disable spin buttons on number inputs */
   input[type='number']::-webkit-outer-spin-button,
   input[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -25,6 +38,40 @@
   }
   input[type='number'] {
     -moz-appearance: textfield;
+  }
+
+  /* Thin, themed scrollbars on webkit */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.10);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.18);
+  }
+}
+
+@layer components {
+  /* Frosted glass surface — for headers, tab bars, floating panels */
+  .glass {
+    @apply backdrop-blur-xl bg-surface/75 border border-white/[0.07];
+  }
+
+  /* Ambient glow helpers */
+  .glow-focus {
+    box-shadow: 0 0 22px rgba(0, 201, 200, 0.28);
+  }
+  .glow-move {
+    box-shadow: 0 0 22px rgba(240, 140, 58, 0.28);
+  }
+  .glow-plan {
+    box-shadow: 0 0 22px rgba(129, 140, 248, 0.28);
   }
 }
 

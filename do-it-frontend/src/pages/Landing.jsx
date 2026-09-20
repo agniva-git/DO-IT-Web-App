@@ -1,5 +1,6 @@
-import { Link } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import Button from '../components/ui/Button.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 
 // Full class strings written out literally (not built via template strings)
 // so Tailwind's JIT scanner can actually find and generate them at build time.
@@ -11,6 +12,18 @@ const loop = [
 ]
 
 export default function Landing() {
+  const { status, isNative } = useAuth()
+
+  // If already authenticated: immediately jump straight to dashboard!
+  if (status === 'authenticated') {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  // On native mobile app: jump straight to login if unauthenticated (no marketing page)
+  if (isNative && status === 'unauthenticated') {
+    return <Navigate to="/login" replace />
+  }
+
   return (
     <div
       className="min-h-screen flex flex-col"

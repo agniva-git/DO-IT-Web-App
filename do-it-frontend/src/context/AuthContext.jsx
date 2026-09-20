@@ -9,7 +9,20 @@ const CACHED_USER_KEY = 'do_it_cached_user'
 const TOKEN_KEY = 'do_it_token'
 const INACTIVITY_LIMIT_MS = 72 * 60 * 60 * 1000 // 72 hours
 const THROTTLE_MS = 60 * 1000 // update timestamp at most once per minute
-const isNative = Capacitor.isNativePlatform()
+
+export function isNativePlatform() {
+  try {
+    return (
+      Capacitor.isNativePlatform() ||
+      window.location.protocol === 'capacitor:' ||
+      (window.location.protocol === 'http:' && window.location.hostname === 'localhost') ||
+      Boolean(window.androidBridge) ||
+      window.navigator.userAgent.includes('wv')
+    )
+  } catch (_) {
+    return false
+  }
+}
 
 function getInitialState() {
   try {
@@ -17,7 +30,8 @@ function getInitialState() {
     if (cached) {
       const parsed = JSON.parse(cached)
       if (parsed && parsed.id) {
-        // If on web, check 72-hour inactivity before using cache
+        const isNative = isNativePlatform()
+        // If on web browser (desktop/mobile browser), check 72-hour inactivity
         if (!isNative) {
           const lastActive = parseInt(localStorage.getItem(LAST_ACTIVE_KEY) || '0', 10)
           if (lastActive > 0 && Date.now() - lastActive > INACTIVITY_LIMIT_MS) {
@@ -27,6 +41,7 @@ function getInitialState() {
             return { user: null, status: 'unauthenticated' }
           }
         }
+        // On native mobile app or active web: hydrate user immediately!
         return { user: parsed, status: 'authenticated' }
       }
     }
@@ -42,9 +57,9 @@ export function AuthProvider({ children }) {
   const [status, setStatus] = useState(initial.status)
   const lastThrottleRef = useRef(0)
 
-  // ── Activity tracking (web only) ──────────────────────────────────────────
+  // ── Activity tracking (web browser only) ──────────────────────────────────
   useEffect(() => {
-    if (isNative) return // native app: never auto-logout
+    if (isNativePlatform()) return // native app: never auto-logout
 
     const updateActivity = () => {
       const now = Date.now()
@@ -59,13 +74,15 @@ export function AuthProvider({ children }) {
     return () => events.forEach((e) => window.removeEventListener(e, updateActivity))
   }, [])
 
-  // ── Session restore (with cold-start resilience & 401-only logout) ─────────
+  // ── Session restore (with cold-start resilience & native persistence) ─────
   useEffect(() => {
     let timeoutId = null
     let mounted = true
 
     const restore = async (retryCount = 0) => {
-      // Web-only: if user has been inactive for >72 hours, log them out silently
+      const isNative = isNativePlatform()
+
+      // Web-only: if user has been inactive for >72 hours on a browser tab
       if (!isNative) {
         const lastActive = parseInt(localStorage.getItem(LAST_ACTIVE_KEY) || '0', 10)
         if (lastActive > 0 && Date.now() - lastActive > INACTIVITY_LIMIT_MS) {
@@ -91,21 +108,30 @@ export function AuthProvider({ children }) {
       } catch (err) {
         if (!mounted) return
 
-        // If the server explicitly returned 401 Unauthorized, the token is genuinely invalid
-        if (err.response?.status === 401) {
-          localStorage.removeItem(CACHED_USER_KEY)
-          localStorage.removeItem(TOKEN_KEY)
-          localStorage.removeItem(LAST_ACTIVE_KEY)
-          setUser(null)
-          setStatus('unauthenticated')
+        const hasCachedSession = Boolean(
+          localStorage.getItem(CACHED_USER_KEY) || localStorage.getItem(TOKEN_KEY)
+        )
+
+        // On native mobile app, NEVER kick the user out on network/startup hiccups
+        if (isNative && hasCachedSession) {
+          setStatus('authenticated')
           return
         }
 
-        // Otherwise: network error, server sleeping (Render cold start 502/503/504), or timeout.
-        // DO NOT log the user out!
-        const hasCachedSession = Boolean(localStorage.getItem(CACHED_USER_KEY) || localStorage.getItem(TOKEN_KEY))
+        // On web: if server explicitly says 401 Unauthorized
+        if (err.response?.status === 401) {
+          if (!isNative) {
+            localStorage.removeItem(CACHED_USER_KEY)
+            localStorage.removeItem(TOKEN_KEY)
+            localStorage.removeItem(LAST_ACTIVE_KEY)
+            setUser(null)
+            setStatus('unauthenticated')
+          }
+          return
+        }
+
+        // Server sleeping (Render cold start) or network timeout
         if (hasCachedSession) {
-          // Keep user logged in with cached data, retry in background (up to 3 times) once Render wakes up
           setStatus('authenticated')
           if (retryCount < 3) {
             timeoutId = setTimeout(() => {
@@ -163,7 +189,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, status, register, login, logout }}>
+    <AuthContext.Provider value={{ user, status, register, login, logout, isNative: isNativePlatform() }}>
       {children}
     </AuthContext.Provider>
   )

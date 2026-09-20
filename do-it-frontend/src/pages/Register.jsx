@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, Navigate } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import Input from '../components/ui/Input.jsx'
 import PasswordInput from '../components/ui/PasswordInput.jsx'
@@ -23,8 +23,8 @@ const initialForm = {
 }
 
 // Maps backend error detail strings (e.g. "email already registered")
-// to the form field that should show the error.
-const FIELD_FOR_DETAIL = {
+// to form field keys so we can attach them to the right input.
+const FIELD_ERROR_MAP = {
   email: 'email',
   username: 'username',
   whatsapp_number: 'whatsapp'
@@ -35,10 +35,14 @@ const FREQUENCY_MAX = { weekly: 7, monthly: 31 }
 
 export default function Register() {
   const navigate = useNavigate()
-  const { register } = useAuth()
+  const { register, status } = useAuth()
   const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+
+  if (status === 'authenticated') {
+    return <Navigate to="/dashboard" replace />
+  }
 
   const update = (key, value) => setForm((f) => ({ ...f, [key]: value }))
   const handleChange = (e) => update(e.target.name, e.target.value)

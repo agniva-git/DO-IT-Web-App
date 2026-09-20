@@ -1,7 +1,8 @@
 import axios from 'axios'
+import { isNativePlatform } from '../context/AuthContext.jsx'
 
-// withCredentials is required for the httpOnly auth cookie to be sent
-// and stored across origins (frontend on :5173, backend on :8000).
+// withCredentials is required for cross-domain cookie support,
+// and Authorization header is sent as primary persistent token.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   withCredentials: true
@@ -24,8 +25,13 @@ export function onLoadingChange(fn) {
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('do_it_token')
-    if (token && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (token) {
+      if (config.headers && typeof config.headers.set === 'function') {
+        config.headers.set('Authorization', `Bearer ${token}`)
+      } else {
+        config.headers = config.headers || {}
+        config.headers['Authorization'] = `Bearer ${token}`
+      }
     }
     activeRequests++
     notify()
@@ -38,10 +44,6 @@ api.interceptors.request.use(
   }
 )
 
-// If the server returns 401 (expired or invalid token), redirect to login
-// rather than showing confusing "Is the backend running?" messages.
-// We skip the interceptor for the /users/me call that AuthContext uses to
-// check session status — that one handles 401 itself.
 api.interceptors.response.use(
   (res) => {
     activeRequests = Math.max(0, activeRequests - 1)
@@ -51,11 +53,14 @@ api.interceptors.response.use(
   (err) => {
     activeRequests = Math.max(0, activeRequests - 1)
     notify()
-    if (
-      err.response?.status === 401 &&
-      !err.config?.url?.includes('/users/me') &&
-      !err.config?.url?.includes('/auth/')
-    ) {
+
+    const isNative = isNativePlatform()
+    const isAuthRoute =
+      err.config?.url?.includes('/users/me') ||
+      err.config?.url?.includes('/auth/')
+
+    // Only redirect to /login on web if the server explicitly rejected the credentials
+    if (err.response?.status === 401 && !isAuthRoute && !isNative) {
       localStorage.removeItem('do_it_token')
       localStorage.removeItem('do_it_cached_user')
       window.location.href = '/login'

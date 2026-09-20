@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import Card from '../components/ui/Card.jsx'
 import Input from '../components/ui/Input.jsx'
 import PasswordInput from '../components/ui/PasswordInput.jsx'
@@ -10,10 +10,14 @@ export default function Login() {
   const navigate = useNavigate()
   const location = useLocation()
   const successMessage = location.state?.message
-  const { login } = useAuth()
+  const { login, status } = useAuth()
   const [form, setForm] = useState({ identifier: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  if (status === 'authenticated') {
+    return <Navigate to="/dashboard" replace />
+  }
 
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }))

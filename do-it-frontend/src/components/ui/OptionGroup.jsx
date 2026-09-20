@@ -8,11 +8,13 @@ export default function OptionGroup({ options, value, onChange, className = '' }
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`whitespace-nowrap px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-card border text-sm font-medium transition-colors shrink-0 ${
-              selected
-                ? 'border-plan bg-plan/15 text-paper'
-                : 'border-line bg-surface text-paper/70 hover:border-paper/30'
-            }`}
+            className={`
+              whitespace-nowrap px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-card border text-sm font-medium
+              transition-all duration-150 ease-spring shrink-0 active:scale-[0.96]
+              ${selected
+                ? 'border-plan/50 bg-plan/10 text-paper'
+                : 'border-white/[0.10] bg-white/[0.03] text-paper/60 hover:border-white/[0.20] hover:text-paper'}
+            `}
           >
             {opt.label}
           </button>

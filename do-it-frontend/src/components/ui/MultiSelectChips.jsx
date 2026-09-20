@@ -16,11 +16,13 @@ export default function MultiSelectChips({ options, values, onChange }) {
             key={opt}
             type="button"
             onClick={() => toggle(opt)}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-card border text-sm transition-colors ${
-              selected
-                ? 'border-move bg-move/10 text-paper'
-                : 'border-line bg-surface text-paper/70 hover:border-paper/30'
-            }`}
+            className={`
+              whitespace-nowrap px-4 py-2.5 rounded-card border text-sm
+              transition-all duration-150 ease-spring active:scale-[0.96]
+              ${selected
+                ? 'border-move/50 bg-move/10 text-paper'
+                : 'border-white/[0.10] bg-white/[0.03] text-paper/60 hover:border-white/[0.20] hover:text-paper'}
+            `}
           >
             {opt}
           </button>

@@ -6,6 +6,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 // PWA plugin is configured here (not bolted on later) so installability
 // and offline behavior are part of the app from Phase 1, per the blueprint.
 export default defineConfig({
+  define: {
+    __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString())
+  },
   plugins: [
     react(),
     VitePWA({

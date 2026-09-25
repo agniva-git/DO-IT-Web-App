@@ -34,23 +34,44 @@ import {
 } from '../utils/date.js'
 
 const PRIORITY_RANK = { high: 0, medium: 1, low: 2 }
+const DASHBOARD_CACHE_KEY = 'do_it_dashboard_cache'
+
+function getCachedDashboard() {
+  try {
+    const raw = localStorage.getItem(DASHBOARD_CACHE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function saveDashboardCache(data) {
+  try {
+    const existing = getCachedDashboard() || {}
+    localStorage.setItem(DASHBOARD_CACHE_KEY, JSON.stringify({ ...existing, ...data }))
+  } catch (err) {
+    console.warn('Failed to save dashboard cache:', err)
+  }
+}
 
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
+
+  const cached = useMemo(() => getCachedDashboard(), [])
+  const [loading, setLoading] = useState(!cached)
   const [error, setError] = useState('')
 
-  const [tasks, setTasks] = useState([])
-  const [focusSessions, setFocusSessions] = useState([])
-  const [workouts, setWorkouts] = useState([])
-  const [preferences, setPreferences] = useState(null)
-  const [habits, setHabits] = useState([])
-  const [habitLogs, setHabitLogs] = useState([])
-  const [todaysExpenses, setTodaysExpenses] = useState([])
-  const [hasBudgetThisMonth, setHasBudgetThisMonth] = useState(false)
-  const [currentMonthId, setCurrentMonthId] = useState(null)
-  const [budgetCategories, setBudgetCategories] = useState([])
+  const [tasks, setTasks] = useState(cached?.tasks || [])
+  const [focusSessions, setFocusSessions] = useState(cached?.focusSessions || [])
+  const [workouts, setWorkouts] = useState(cached?.workouts || [])
+  const [preferences, setPreferences] = useState(cached?.preferences || null)
+  const [habits, setHabits] = useState(cached?.habits || [])
+  const [habitLogs, setHabitLogs] = useState(cached?.habitLogs || [])
+  const [todaysExpenses, setTodaysExpenses] = useState(cached?.todaysExpenses || [])
+  const [hasBudgetThisMonth, setHasBudgetThisMonth] = useState(cached?.hasBudgetThisMonth || false)
+  const [currentMonthId, setCurrentMonthId] = useState(cached?.currentMonthId || null)
+  const [budgetCategories, setBudgetCategories] = useState(cached?.budgetCategories || [])
 
   // Quick expense modal state
   const [expenseModalOpen, setExpenseModalOpen] = useState(false)
@@ -63,50 +84,109 @@ export default function Dashboard() {
   )
 
   useEffect(() => {
+    let mounted = true
+
     const loadEverything = async () => {
-      const [t, f, w, prefs, h, logs, budgetMonths] = await Promise.all([
-        listTasks(),
-        listFocusSessions(),
-        listWorkouts(),
-        getPreferences(),
-        listHabits(),
-        listHabitLogs(),
-        listMonths()
-      ])
-      setTasks(t)
-      setFocusSessions(f)
-      setWorkouts(w)
-      setPreferences(prefs)
-      setHabits(h)
-      setHabitLogs(logs)
-
-      const { year, month } = currentYearMonth()
-      const currentBudget = budgetMonths.find((m) => m.year === year && m.month === month)
-      if (currentBudget) {
-        setHasBudgetThisMonth(true)
-        setCurrentMonthId(currentBudget.id)
-        // Fetch full month detail for categories + today's flat expenses in parallel.
-        const [fullMonth, flat] = await Promise.all([
-          getMonth(currentBudget.id),
-          listMonthExpenses(currentBudget.id)
+      try {
+        const results = await Promise.allSettled([
+          listTasks(),
+          listFocusSessions(),
+          listWorkouts(),
+          getPreferences(),
+          listHabits(),
+          listHabitLogs(),
+          listMonths()
         ])
-        // Sort: non-default (real planned categories) first, Sudden Expenses last.
-        const sorted = [...(fullMonth.categories || [])].sort(
-          (a, b) => (a.is_default ? 1 : 0) - (b.is_default ? 1 : 0)
-        )
-        setBudgetCategories(sorted)
-        setTodaysExpenses(flat.filter((e) => e.date === localDateISO()))
-      }
 
-      if (storedPreference()) {
-        api.post('/notifications/check-reminders').catch(() => {})
+        if (!mounted) return
+
+        const [resTasks, resFocus, resWorkouts, resPrefs, resHabits, resHabitLogs, resBudgetMonths] = results
+        const cacheUpdate = {}
+
+        if (resTasks.status === 'fulfilled') {
+          setTasks(resTasks.value)
+          cacheUpdate.tasks = resTasks.value
+        }
+        if (resFocus.status === 'fulfilled') {
+          setFocusSessions(resFocus.value)
+          cacheUpdate.focusSessions = resFocus.value
+        }
+        if (resWorkouts.status === 'fulfilled') {
+          setWorkouts(resWorkouts.value)
+          cacheUpdate.workouts = resWorkouts.value
+        }
+        if (resPrefs.status === 'fulfilled') {
+          setPreferences(resPrefs.value)
+          cacheUpdate.preferences = resPrefs.value
+        }
+        if (resHabits.status === 'fulfilled') {
+          setHabits(resHabits.value)
+          cacheUpdate.habits = resHabits.value
+        }
+        if (resHabitLogs.status === 'fulfilled') {
+          setHabitLogs(resHabitLogs.value)
+          cacheUpdate.habitLogs = resHabitLogs.value
+        }
+
+        if (resBudgetMonths.status === 'fulfilled' && Array.isArray(resBudgetMonths.value)) {
+          const { year, month } = currentYearMonth()
+          const currentBudget = resBudgetMonths.value.find((m) => m.year === year && m.month === month)
+          if (currentBudget) {
+            setHasBudgetThisMonth(true)
+            setCurrentMonthId(currentBudget.id)
+            cacheUpdate.hasBudgetThisMonth = true
+            cacheUpdate.currentMonthId = currentBudget.id
+
+            const [fullMonthRes, flatRes] = await Promise.allSettled([
+              getMonth(currentBudget.id),
+              listMonthExpenses(currentBudget.id)
+            ])
+
+            if (mounted) {
+              if (fullMonthRes.status === 'fulfilled') {
+                const sorted = [...(fullMonthRes.value.categories || [])].sort(
+                  (a, b) => (a.is_default ? 1 : 0) - (b.is_default ? 1 : 0)
+                )
+                setBudgetCategories(sorted)
+                cacheUpdate.budgetCategories = sorted
+              }
+              if (flatRes.status === 'fulfilled') {
+                const todayFlat = flatRes.value.filter((e) => e.date === localDateISO())
+                setTodaysExpenses(todayFlat)
+                cacheUpdate.todaysExpenses = todayFlat
+              }
+            }
+          }
+        }
+
+        if (Object.keys(cacheUpdate).length > 0) {
+          saveDashboardCache(cacheUpdate)
+        }
+
+        const allFailed = results.every((r) => r.status === 'rejected')
+        if (allFailed && !cached) {
+          setError('Could not connect to server. Retrying in background…')
+        } else {
+          setError('')
+        }
+
+        if (storedPreference()) {
+          api.post('/notifications/check-reminders').catch(() => {})
+        }
+      } catch (err) {
+        if (!cached) {
+          setError('Could not load dashboard data. Is the backend running?')
+        }
+      } finally {
+        if (mounted) setLoading(false)
       }
     }
 
     loadEverything()
-      .catch(() => setError('Could not load dashboard data. Is the backend running?'))
-      .finally(() => setLoading(false))
-  }, [])
+    return () => {
+      mounted = false
+    }
+  }, [cached])
 
   const today = localDateISO()
 
@@ -190,15 +270,23 @@ export default function Dashboard() {
     if (!task) return
     const wasCompleting = task.status !== 'completed'
     // Optimistic update
-    setTasks((ts) =>
-      ts.map((t) => (t.id === id ? { ...t, status: wasCompleting ? 'completed' : 'pending' } : t))
-    )
+    const updatedPending = tasks.map((t) => (t.id === id ? { ...t, status: wasCompleting ? 'completed' : 'pending' } : t))
+    setTasks(updatedPending)
+    saveDashboardCache({ tasks: updatedPending })
     try {
       const updated = await toggleTaskComplete(id)
-      setTasks((ts) => ts.map((t) => (t.id === id ? updated : t)))
+      setTasks((ts) => {
+        const next = ts.map((t) => (t.id === id ? updated : t))
+        saveDashboardCache({ tasks: next })
+        return next
+      })
     } catch {
       // Roll back
-      setTasks((ts) => ts.map((t) => (t.id === id ? task : t)))
+      setTasks((ts) => {
+        const rollback = ts.map((t) => (t.id === id ? task : t))
+        saveDashboardCache({ tasks: rollback })
+        return rollback
+      })
     }
   }
 
@@ -207,15 +295,26 @@ export default function Dashboard() {
     await logExpense(categoryId, expenseData)
     // Refresh expenses and categories (remaining amounts change after a log).
     if (currentMonthId) {
-      const [fullMonth, flat] = await Promise.all([
+      const [fullMonthRes, flatRes] = await Promise.allSettled([
         getMonth(currentMonthId),
         listMonthExpenses(currentMonthId)
       ])
-      const sorted = [...(fullMonth.categories || [])].sort(
-        (a, b) => (a.is_default ? 1 : 0) - (b.is_default ? 1 : 0)
-      )
-      setBudgetCategories(sorted)
-      setTodaysExpenses(flat.filter((e) => e.date === localDateISO()))
+      const cachePatch = {}
+      if (fullMonthRes.status === 'fulfilled') {
+        const sorted = [...(fullMonthRes.value.categories || [])].sort(
+          (a, b) => (a.is_default ? 1 : 0) - (b.is_default ? 1 : 0)
+        )
+        setBudgetCategories(sorted)
+        cachePatch.budgetCategories = sorted
+      }
+      if (flatRes.status === 'fulfilled') {
+        const todayExp = flatRes.value.filter((e) => e.date === localDateISO())
+        setTodaysExpenses(todayExp)
+        cachePatch.todaysExpenses = todayExp
+      }
+      if (Object.keys(cachePatch).length > 0) {
+        saveDashboardCache(cachePatch)
+      }
     }
     setExpenseModalOpen(false)
   }
@@ -224,7 +323,11 @@ export default function Dashboard() {
   const handleQuickAddTask = async (formData) => {
     try {
       const created = await createTask(formData)
-      setTasks((ts) => [...ts, created])
+      setTasks((ts) => {
+        const next = [...ts, created]
+        saveDashboardCache({ tasks: next })
+        return next
+      })
       setTaskModalOpen(false)
     } catch {
       setError('Could not save task — please try again.')
@@ -236,26 +339,27 @@ export default function Dashboard() {
     const nextCompleted = existing ? !existing.completed : true
 
     setHabitLogs((ls) => {
-      if (existing) {
-        return ls.map((l) =>
-          l.habit_id === habitId && l.date === today ? { ...l, completed: nextCompleted } : l
-        )
-      }
-      return [...ls, { habit_id: habitId, date: today, completed: nextCompleted }]
+      const next = existing
+        ? ls.map((l) => (l.habit_id === habitId && l.date === today ? { ...l, completed: nextCompleted } : l))
+        : [...ls, { habit_id: habitId, date: today, completed: nextCompleted }]
+      saveDashboardCache({ habitLogs: next })
+      return next
     })
 
     try {
       await checkIn(habitId, today, nextCompleted)
     } catch {
-      setHabitLogs((ls) =>
-        existing
+      setHabitLogs((ls) => {
+        const rollback = existing
           ? ls.map((l) =>
               l.habit_id === habitId && l.date === today
                 ? { ...l, completed: existing.completed }
                 : l
             )
           : ls.filter((l) => !(l.habit_id === habitId && l.date === today))
-      )
+        saveDashboardCache({ habitLogs: rollback })
+        return rollback
+      })
     }
   }
 

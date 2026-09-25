@@ -5,7 +5,8 @@ import { isNativePlatform } from '../context/AuthContext.jsx'
 // and Authorization header is sent as primary persistent token.
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
-  withCredentials: true
+  withCredentials: true,
+  timeout: 45000
 })
 
 let activeRequests = 0

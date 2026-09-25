@@ -1,28 +1,41 @@
+import React, { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
-import ForgotPassword from './pages/ForgotPassword.jsx'
-import ResetPassword from './pages/ResetPassword.jsx'
-import Onboarding from './pages/Onboarding.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-import Tasks from './pages/Tasks.jsx'
-import Study from './pages/Study.jsx'
-import Focus from './pages/Focus.jsx'
-import Fitness from './pages/Fitness.jsx'
-import Habits from './pages/Habits.jsx'
-import Budget from './pages/Budget.jsx'
-import Analytics from './pages/Analytics.jsx'
-import Settings from './pages/Settings.jsx'
 import AppLayout from './components/layout/AppLayout.jsx'
 import ProtectedRoute from './components/layout/ProtectedRoute.jsx'
 
+// Lazy-loaded routes for code-splitting & performance optimization
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword.jsx'))
+const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'))
+const Onboarding = lazy(() => import('./pages/Onboarding.jsx'))
+const Tasks = lazy(() => import('./pages/Tasks.jsx'))
+const Study = lazy(() => import('./pages/Study.jsx'))
+const Focus = lazy(() => import('./pages/Focus.jsx'))
+const Fitness = lazy(() => import('./pages/Fitness.jsx'))
+const Habits = lazy(() => import('./pages/Habits.jsx'))
+const Budget = lazy(() => import('./pages/Budget.jsx'))
+const Analytics = lazy(() => import('./pages/Analytics.jsx'))
+const Settings = lazy(() => import('./pages/Settings.jsx'))
+
+const PageFallback = () => (
+  <div className="flex-1 min-h-[50vh] flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+)
+
 // Wraps a page in both the sidebar/tab-bar shell and the auth check,
-// since every module page needs both.
+// with a Suspense boundary for lazy chunks.
 function Protected({ children }) {
   return (
     <ProtectedRoute>
-      <AppLayout>{children}</AppLayout>
+      <AppLayout>
+        <Suspense fallback={<PageFallback />}>
+          {children}
+        </Suspense>
+      </AppLayout>
     </ProtectedRoute>
   )
 }
@@ -33,9 +46,32 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+      <Route
+        path="/forgot-password"
+        element={
+          <Suspense fallback={<PageFallback />}>
+            <ForgotPassword />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/reset-password"
+        element={
+          <Suspense fallback={<PageFallback />}>
+            <ResetPassword />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageFallback />}>
+              <Onboarding />
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
       <Route path="/tasks" element={<Protected><Tasks /></Protected>} />
